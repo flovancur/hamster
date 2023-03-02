@@ -29,30 +29,36 @@ Erstellen Sie daraus ein Programm **hamster**, das mit einem Kommandoparameter
 und (je nach Kommando) evtl. weiteren Parametern aufgerufen wird, und das
 folgende Funktionen unterstützt:
 
-- hamster list
+- `hamster list`
+
 	Gibt eine Liste mit dem gesamten Hamsterbestand  (Namen, Preise und Leckerli-Vorrat) tabellarisch aus.
 
-- hamster list Meier
+- `hamster list Meier`
+
 	Gibt eine Liste mit den Hamstern des Besitzers *Meier* aus.
 
-- hamster add Schmidt Pausbackenbube
+- `hamster add Schmidt Pausbackenbube`
+
 	Fügt einen neuen Datensatz für den Hamster *Pausbackenbube* des Besitzers *Schmidt* mit dem
 	Standard-Anfangspreis 17€ (= Vollpension zzgl. Laufradbenutzung) hinzu.
 
-- hamster add Schmidt Pausbackenbube 55
+- `hamster add Schmidt Pausbackenbube 55`
+
 	Wie oben, jedoch erhält  *Pausbackenbube* einen Vorrat von 55 Leckerli mit auf den Weg.
 
-- hamster feed Bilbo Baggins 3
+- `hamster feed Bilbo Baggins 3`
+
 	Verfüttere 3 Leckerli an den Hamster *Baggins* des Besitzers *Bilbo*.
 	Falls der Leckerli-Vorrat von *Baggins* erschöpft ist, erhöht sich der Preis
 	um 2€ je Leckerli.
 
-- hamster state Dirk Dickbacke
+- `hamster state Dirk Dickbacke`
+
 	Zustandsabfrage des Hamsters *Dickbacke* des Besitzers *Dirk*. Geliefert
 	wird die Anzahl der Laufradumdrehungen, die Größe des Leckerlivorrats
 	und der aktuelle Preis, der sich durch die Abfrage um jeweils 1€ erhöht.
 
-- hamster remove-all Bigspender
+- `hamster bill Bigspender`
 	Gibt den vom Besitzer *Bigspender* zu zahlenden Gesamtbetrag (Summe über alle seine Hamster)
 	aus und löscht alle Datensätze von *Bigspender*.
 

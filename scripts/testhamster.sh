@@ -1,5 +1,5 @@
 #!/bin/bash
-HMSTR=../bin/hamster
+HMSTR=../hamster
 rm -f *.dat
 
 okayesno()
@@ -148,8 +148,8 @@ testno="1.5"
 read -r -d '' expect <<'EOF'
 meier has to pay 17 €
 EOF
-cmd="$HMSTR remove-all meier"
-$check "$testno" "$expect" "$cmd" "remove-all Name Fehler"
+cmd="$HMSTR bill meier"
+$check "$testno" "$expect" "$cmd" "bill Name Fehler"
 
 
 testno="1.6"
@@ -262,14 +262,14 @@ $check "$testno" "$expect" "$cmd" "state keine args -> kein Fehler"
 
 testno="2.16"
 expect="$rtfm"
-cmd="$HMSTR remove-all blah ratz"
-$check "$testno" "$expect" "$cmd" "remove-all zuviele args -> kein Fehler"
+cmd="$HMSTR bill blah ratz"
+$check "$testno" "$expect" "$cmd" "bill zuviele args -> kein Fehler"
 
 
 testno="2.17"
 expect="$rtfm"
-cmd="$HMSTR remove-all"
-$check "$testno" "$expect" "$cmd" "remove-all keine args -> kein Fehler"
+cmd="$HMSTR bill"
+$check "$testno" "$expect" "$cmd" "bill keine args -> kein Fehler"
 
 
 echo "*********************************************"
@@ -285,14 +285,14 @@ $check "$testno" "$expect" "$cmd" "list unbek Kunde -> kein Fehler"
 
 testno="3.2.1"
 expect="schmidt has to pay 17 €"
-cmd="$HMSTR remove-all schmidt"
-$check "$testno" "$expect" "$cmd" "remove-all Fehler"
+cmd="$HMSTR bill schmidt"
+$check "$testno" "$expect" "$cmd" "bill Fehler"
 
 
 testno="3.2.2"
 expect="mueller has to pay 18 €"
-cmd="$HMSTR remove-all mueller"
-$check "$testno" "$expect" "$cmd" "remove-all Fehler"
+cmd="$HMSTR bill mueller"
+$check "$testno" "$expect" "$cmd" "bill Fehler"
 
 testno="3.2.3"
 expect="No hamsters matching criteria found"
@@ -342,8 +342,8 @@ $check "$testno" "$expect" "$cmd" "state unbek Kunde -> kein Fehler"
 
 testno="3.8"
 expect="Error: A hamster or hamster owner could not be found"
-cmd="$HMSTR remove-all Blott"
-$check "$testno" "$expect" "$cmd" "remove-all unbek Kunde -> kein Fehler"
+cmd="$HMSTR bill Blott"
+$check "$testno" "$expect" "$cmd" "bill unbek Kunde -> kein Fehler"
 
 
 echo "*********************************************"
@@ -408,5 +408,5 @@ $check "$testno" "$expect" "$cmd" "state ein Langer Name -> kein Fehler"
 
 testno="4.9"
 expect="Error: the specified name is too long"
-cmd="$HMSTR remove-all Ludovic_Freihherr_von_Knoblauch_zu_Hatzbach"
-$check "$testno" "$expect" "$cmd" "remove-all Langer Name -> kein Fehler"
+cmd="$HMSTR bill Ludovic_Freihherr_von_Knoblauch_zu_Hatzbach"
+$check "$testno" "$expect" "$cmd" "bill Langer Name -> kein Fehler"

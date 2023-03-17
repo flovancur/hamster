@@ -1,0 +1,26 @@
+image: gcc
+  
+stages:
+  - build
+  - test
+
+build:
+  tags:
+    - docker
+  stage: build
+  script: 
+    - apt-get update
+    - apt-get install doxygen -yq
+    - make
+
+test-code-job1:
+  tags:
+    - docker
+  stage: test
+  script:
+    - chmod 755 scripts/testhamster.sh
+    - scripts/testhamster.sh -n > testresult.txt
+  artifacts:
+    when: always
+    paths:
+      - testresult.txt

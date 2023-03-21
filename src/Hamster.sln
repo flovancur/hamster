@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33502.453
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HamsterCLI", "HamsterCLI\HamsterCLI.csproj", "{C65621BB-2246-4431-A352-C432E1838508}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hamsterlib", "Hamsterlib\Hamsterlib.csproj", "{99467947-32FD-4410-A603-7676DF616C28}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C65621BB-2246-4431-A352-C432E1838508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C65621BB-2246-4431-A352-C432E1838508}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C65621BB-2246-4431-A352-C432E1838508}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C65621BB-2246-4431-A352-C432E1838508}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99467947-32FD-4410-A603-7676DF616C28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99467947-32FD-4410-A603-7676DF616C28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99467947-32FD-4410-A603-7676DF616C28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99467947-32FD-4410-A603-7676DF616C28}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44418AE2-A37B-42C9-B3AC-9209AE544F92}
+	EndGlobalSection
+EndGlobal

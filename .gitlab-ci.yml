@@ -15,7 +15,7 @@ build:
   script: 
     - 'chmod u+x gradle-build.sh'
     - 'chmod u+x gradlew'
-    - ''./gradle-build.sh "$HTTP_PROXY" jar'
+    - './gradle-build.sh "$HTTP_PROXY" jar'
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push

@@ -1,6 +1,7 @@
 #!/bin/bash
-HMSTR=../hamster
+HMSTR="./hamster"
 rm -f *.dat
+rm -f *.xml
 
 okayesno()
 {
@@ -18,11 +19,12 @@ check_interactive()
 	expect=$2
 	cmd=$3
 	errmsg=$4
-	received=`$cmd`
+	received=$($cmd 2>&1)
 	echo "*********************************************"
-	echo "** $testno Erwartet wird:"
+	echo "$cmd"
+	echo "** $testno Expected:"
 	echo "$expect"
-	echo "** $testno Erhalten wurde:"
+	echo "** $testno Received:"
 	echo "$received"
 	echo "*********************************************"
 	okayesno "$testno $errmsg"
@@ -34,13 +36,14 @@ check_noninteractive()
 	expect=$2
 	cmd=$3
 	errmsg=$4
-	received=`$cmd`
+	received=$($cmd 2>&1)
 	echo "$received" >__received.txt
 	echo "$expect">__expected.txt
-	difference=`diff -b __received.txt __expected.txt`
+	difference=$(diff -b __received.txt __expected.txt)
 	rm -f __received.txt __expected.txt	
 	if [ "$difference" ] ; then
 		echo "*********************************************"
+		echo "$cmd"
 		echo "** $testno: Descrepancies:"
 		echo "$difference"
 		echo "*********************************************"
@@ -48,8 +51,24 @@ check_noninteractive()
 	fi
 }
 
+check_rtfm()
+{
+	testno=$1
+	cmd=$2
+	errmsg=$3
+	received=$($cmd 2>&1)
+	if [ $? -ne 2 ] ; then
+		echo "*********************************************"
+		echo "$cmd"
+		echo "** $testno: should fail with code 2 but printed:"
+		echo "$received"
+		echo "*********************************************"
+		okayesno "$testno $errmsg"		
+	fi
+}
 
-check=check_interactive
+
+check=check_noninteractive
 
 for i in "$@"
 do
@@ -80,7 +99,7 @@ sleep 1
 echo "*********************************************"
 echo "**       0    RTFM-Nachricht               **"
 echo "*********************************************"
-rtfm=`$HMSTR`
+rtfm=$($HMSTR 2>&1)
 if [ -z "$rtfm" ] ; then
 	echo "*********************************************"
 	echo "** 0 Erwartet wird:"
@@ -104,7 +123,7 @@ sleep 4
 
 testno="1.1"
 read -r -d '' expect <<'EOF'
-Owner		Name	Price	treats left
+Owner	Name	Price	treats left
 schmidt	baggins	17 €	17
 mueller	mueller	17 €	22
 meier	meier	17 €	0
@@ -115,7 +134,7 @@ $check "$testno" "$expect" "$cmd" "list Fehler"
 
 testno="1.2"
 read -r -d '' expect <<'EOF'
-Owner		Name	Price	treats left
+Owner	Name	Price	treats left
 mueller	mueller	17 €	22
 EOF
 cmd="$HMSTR list mueller"
@@ -129,7 +148,7 @@ $check "$testno" "$expect" "$cmd" "feed Fehler"
 
 testno="1.3.2"
 read -r -d '' expect <<'EOF'
-Owner		Name	Price	treats left
+Owner	Name	Price	treats left
 schmidt	baggins	17 €	14
 EOF
 cmd="$HMSTR list schmidt"
@@ -154,7 +173,7 @@ $check "$testno" "$expect" "$cmd" "bill Name Fehler"
 
 testno="1.6"
 read -r -d '' expect <<'EOF'
-Owner		Name	Price	treats left
+Owner	Name	Price	treats left
 schmidt	baggins	17 €	14
 mueller	mueller	18 €	22
 EOF
@@ -171,105 +190,105 @@ sleep 1
 testno="2.1"
 expect="$rtfm"
 cmd="$HMSTR"
-$check "$testno" "$expect" "$cmd" "keine Option -> kein Fehler"
+check_rtfm "$testno" "$cmd" "keine Option -> kein Fehler"
 
 
 testno="2.2"
 expect="$rtfm"
 cmd="$HMSTR -u"
-$check "$testno" "$expect" "$cmd" "ungueltige Option -> kein Fehler"
+check_rtfm "$testno" "$cmd" "ungueltige Option -> kein Fehler"
 
 
 testno="2.3"
 expect="$rtfm"
 
 cmd="$HMSTR list blah blubb"
-$check "$testno" "$expect" "$cmd" "list zuviele args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "list zuviele args -> kein Fehler"
 
 
 testno="2.4"
 expect="$rtfm"
 
 cmd="$HMSTR add blah ratz 22 fatz"
-$check "$testno" "$expect" "$cmd" "add zuviele args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "add zuviele args -> kein Fehler"
 
 
 testno="2.5"
 expect="$rtfm"
 cmd="$HMSTR add blah"
-$check "$testno" "$expect" "$cmd" "add zu wenige args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "add zu wenige args -> kein Fehler"
 
 
 testno="2.6"
 expect="$rtfm"
 cmd="$HMSTR add"
-$check "$testno" "$expect" "$cmd" "add keine args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "add keine args -> kein Fehler"
 
 
 testno="2.7"
 expect="$HMSTR: Not a number: fatz"
 cmd="$HMSTR add blah ratz fatz"
-$check "$testno" "$expect" "$cmd" "add keine Zahl -> kein Fehler"
+check_rtfm "$testno" "$cmd" "add keine Zahl -> kein Fehler"
 
 
 testno="2.8"
 expect="$rtfm"
 cmd="$HMSTR feed blah ratz 22 fatz"
-$check "$testno" "$expect" "$cmd" "feed zuviele args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "feed zuviele args -> kein Fehler"
 
 
 testno="2.9"
 expect="$rtfm"
 cmd="$HMSTR feed blah ratz"
-$check "$testno" "$expect" "$cmd" "feed zu wenige args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "feed zu wenige args -> kein Fehler"
 
 
 testno="2.10"
 expect="$rtfm"
 cmd="$HMSTR feed blah"
-$check "$testno" "$expect" "$cmd" "feed zu wenige args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "feed zu wenige args -> kein Fehler"
 
 
 testno="2.11"
 expect="$rtfm"
 cmd="$HMSTR feed"
-$check "$testno" "$expect" "$cmd" "feed keine args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "feed keine args -> kein Fehler"
 
 
 testno="2.12"
 expect="$HMSTR: Not a number: fatz"
 cmd="$HMSTR feed blah ratz fatz"
-$check "$testno" "$expect" "$cmd" "feed keine Zahl -> kein Fehler"
+check_rtfm "$testno" "$cmd" "feed keine Zahl -> kein Fehler"
 
 
 testno="2.13"
 expect="$rtfm"
 cmd="$HMSTR state blah ratz fatz"
-$check "$testno" "$expect" "$cmd" "state zuviele args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "state zuviele args -> kein Fehler"
 
 
 testno="2.14"
 expect="$rtfm"
 cmd="$HMSTR state blah"
-$check "$testno" "$expect" "$cmd" "state zu wenige args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "state zu wenige args -> kein Fehler"
 
 
 testno="2.15"
 expect="$rtfm"
 cmd="$HMSTR state"
-$check "$testno" "$expect" "$cmd" "state keine args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "state keine args -> kein Fehler"
 
 
 testno="2.16"
 expect="$rtfm"
 cmd="$HMSTR bill blah ratz"
-$check "$testno" "$expect" "$cmd" "bill zuviele args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "bill zuviele args -> kein Fehler"
 
 
 testno="2.17"
 expect="$rtfm"
 cmd="$HMSTR bill"
-$check "$testno" "$expect" "$cmd" "bill keine args -> kein Fehler"
+check_rtfm "$testno" "$cmd" "bill keine args -> kein Fehler"
 
 
 echo "*********************************************"

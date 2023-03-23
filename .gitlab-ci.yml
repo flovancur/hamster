@@ -34,7 +34,7 @@ test-code-job1:
     - 'dotnet build --no-restore src'
     - chmod u+x scripts/testhamster.sh
     - cd scripts
-    - testhamster.sh -n > testresult.txt
+    - './testhamster.sh -n > testresult.txt'
   artifacts:
     when: always
     paths:

@@ -33,8 +33,9 @@ test-code-job1:
     - 'dotnet restore --packages $NUGET_PACKAGES_DIRECTORY src'
     - 'dotnet build --no-restore src'
     - chmod u+x scripts/testhamster.sh
-    - scripts/testhamster.sh -n > testresult.txt
+    - cd scripts
+    - testhamster.sh -n > testresult.txt
   artifacts:
     when: always
     paths:
-      - testresult.txt
+      - 'scripts/testresult.txt'

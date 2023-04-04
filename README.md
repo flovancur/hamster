@@ -1,69 +1,46 @@
-# HamsterLib
+# HamsterRPC
 
-Wer länger unterwegs ist, kann seine Goldhamster bei einem westhessischen
-Hamsterverwahrungsunternehmen abgeben. Die Verwaltung der Gasthamster soll
-nun durch ein neues IT-System unterstützt werden. Die Kunden können ihre
-Hamster abgeben und ihnen dabei optional einen Vorrat an Leckerli mitgeben. Für
-die Aufnahme eines Hamsters wird einmalig ein Grundbetrag von 17€ fällig.
-Die Hamster haben nichts besseres zu tun als ständig in ihrem Laufrad zu
-rennen, wodurch dieses mit einer Drehzahl von 25 Umdrehungen pro Minute
-rotiert. Diese Umdrehungen werden vom System erfasst und pro 1000 Umdrehungen
-erhöht sich der am Ende zu zahlende Betrag um 5€. Die Kunden können anrufen und
-sich nach dem Wohlergehen ihrer Lieblinge erkundigen. Für jeden Anruf
-dieser Art wird 1€ berechnet. Ausserdem können die Kunden ihrem Hamster
-Leckerli geben lassen. Ist dabei der anfängliche Vorrat an Leckerli erschöpft,
-so stellt das Hamsterasyl natürlich gerne weitere Leckerli zur Verfügung -- 
-allerdings zum Stückpreis von 2€.
+Das zuvor entwickelte IT-System für das westhessische
+Hamsterverwahrungsunternehmen ist bei den Mitarbeitern sehr gut angekommen. 
+Durch dieses wichtige Hilfsmittel konnten weitere Kunden gewonnen werden und das
+Unternehmen ist gewachsen. Inzwischen reicht ein Mitarbeiter und Arbeitsplatz
+nicht mehr aus, um die ganzen Anfragen der Kunden zu bearbeiten. Es besteht daher
+Bedarf an einer Version über die mehrere Mitarbeiter mit ihren PCs gleichzeitig 
+auf das IT-System zugreifen können. Das existierende System soll aber nicht 
+abgelöst, sondern aus Kostengründen nur mit Netzwerkfunktionalität 
+erweitert werden. 
 
-Zufällig entdeckt die IT-Abteilung des Hamsterverwahrungsunternehmens
-die Open-Source-Bibliothek *Hamsterlib*, die exakt die benötigten Funktionen implementiert,
-und die somit verwendet werden soll. Den Quellcode zu dieser Bibliothek
-finden Sie in diesem Git-Repository. Eigenartigerweise steht der Quellcode auch noch in
-mehreren Programmiersprachen zur Verfügung. 
+Die IT-Verantwortliche möchte, dass das Frontend praktisch gleich bleiben kann
+und zusätzlich die Möglichkeit besteht mit moderneren Programmiersprachen neue
+Frontends zu entwickeln. Auf einer Fortbildung hat sie gelernt, dass RPCs der
+letzte Schrei sind und man das unbedingt machen muss, um ein erfolgreiches und
+hippes Unternehmen zu sein.
 
-Machen Sie sich anhand der Dokumentation und dem Quellcode in \texttt{libsrc}
-mit den API-Funktionen der Bibliothek vertraut. Insgesamt bietet die Bibliothek
-sieben Funktionen.
+Praktischerweise haben die Entwickler der Open-Source-Bibliothek *Hamsterlib*
+ein passendes RPC-Protokoll für ihre Bibliothek spezifiziert. Die 
+Implementierung des Protokolls wird allerdings kommerziell vertrieben, damit die
+Entwickler ihre Miete bezahlen können. Dafür ist das 
+Hamsterverwahrungsunternehmen allerdings zu geizig. Es von Ihnen neu 
+implementieren zu lassen ist günstiger, zumal die IT-Verantwortliche beim Surfen
+sogar einen fertigen Java-Client gefunden hat. Es wird also nur noch der Server
+benötigt!
 
-Erstellen Sie daraus ein Programm **hamster**, das mit einem Kommandoparameter
-und (je nach Kommando) evtl. weiteren Parametern aufgerufen wird, und das
-folgende Funktionen unterstützt:
+Der Server soll als Default nur lokal auf *localhost* also der IP-Adresse 
+**127.0.0.1** laufen. Dieses Vorgehen ist generell immer sinnvoll. Es 
+verhindert, dass Dienste aus Versehen über das Netzwerk oder gar das Internet 
+zugegriffen werden können. Mit dem optionalen Kommandoparameter `-h IP-ADRESSE`
+soll dann die IP-Adresse festgelegt werden auf der der 
+Server seinen Dienst anbietet (optional im Sinne von: wenn nicht angegeben, wird 
+die Default-Adresse gewählt). Halten Sie sich für die Syntax wieder an die 
+rtfm()-Funktion. 
 
-- `hamster list`
+Ihre Aufgabe ist nun: Bauen Sie einen Server, der die Hamsterlib-Funktionen über 
+das Hamster-RPC-Protokoll bereitstellt. Das heißt, ein Client schickt
+eine Anfrage, um eine Funktion aufzurufen, Ihr Server empfängt und dekodiert 
+diese, ruft dann die entsprechende Hamsterlib-Funktion auf, packt das Ergebnis
+in eine Antwort und schickt diese an den Client.
 
-	Gibt eine Liste mit dem gesamten Hamsterbestand  (Namen, Preise und Leckerli-Vorrat) tabellarisch aus.
-
-- `hamster list Meier`
-
-	Gibt eine Liste mit den Hamstern des Besitzers *Meier* aus.
-
-- `hamster add Schmidt Pausbackenbube`
-
-	Fügt einen neuen Datensatz für den Hamster *Pausbackenbube* des Besitzers *Schmidt* mit dem
-	Standard-Anfangspreis 17€ (= Vollpension zzgl. Laufradbenutzung) hinzu.
-
-- `hamster add Schmidt Pausbackenbube 55`
-
-	Wie oben, jedoch erhält  *Pausbackenbube* einen Vorrat von 55 Leckerli mit auf den Weg.
-
-- `hamster feed Bilbo Baggins 3`
-
-	Verfüttere 3 Leckerli an den Hamster *Baggins* des Besitzers *Bilbo*.
-	Falls der Leckerli-Vorrat von *Baggins* erschöpft ist, erhöht sich der Preis
-	um 2€ je Leckerli.
-
-- `hamster state Dirk Dickbacke`
-
-	Zustandsabfrage des Hamsters *Dickbacke* des Besitzers *Dirk*. Geliefert
-	wird die Anzahl der Laufradumdrehungen, die Größe des Leckerlivorrats
-	und der aktuelle Preis, der sich durch die Abfrage um jeweils 1€ erhöht.
-
-- `hamster bill Bigspender`
-	Gibt den vom Besitzer *Bigspender* zu zahlenden Gesamtbetrag (Summe über alle seine Hamster)
-	aus und löscht alle Datensätze von *Bigspender*.
-
-**Hinweise**
-- Falsche oder fehlende Benutzereingaben müssen abgefangen und mit einer Fehlermeldung zurückgewiesen werden. Ihr Programm sollte in solchen Fällen eine kurze Bedienungsanleitung ("RTFM-Text") ausgeben.
-- Falsche Parameter (z.B. zu lange Besitzer- oder Hamsternamen) werden von der Bibliothek zurückgewiesen. Ihr Programm sollte in solchen Fällen eine qualifizierte Fehlermeldung ausgeben.
-- Jede **Kombination** aus Hamster- und Besitzernamen darf nur ein Mal vorkommen. Versuche, dieselbe Namenskombination ein weiteres Mal einzutragen	werden von der Bibliothek erkannt und müssen mit einer qualifizierten Fehlermeldung zurückgewiesen werden.
-- Im Verzeichnis *scripts* finden Sie ein Shell-Script *testhamster.sh*, mit dem Sie Ihr Programm gründlich testen können. Es ruft Ihr Programm mit verschiedenen Optionen auf und vergleicht die erhaltene Ausgabe mit der Ausgabe der Referenz-Implementierung.
+Der Server soll als minimale Anforderung als einfacher sequenzieller Server 
+aufgebaut sein. Beachten Sie, dass der Client für jeden RPC-Aufruf eine neue 
+Verbindung aufbauen kann und Ihr Server natürlich in der Lage sein muss mehrere 
+Anfragen nacheinander abarbeiten zu können.

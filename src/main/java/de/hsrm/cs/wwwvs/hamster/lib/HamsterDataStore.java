@@ -70,7 +70,8 @@ public class HamsterDataStore implements Iterable<DataStoreEntry> {
 	 */
 	private int createHash(String ownerName, String hamsterName) {
 		String key = ownerName + hamsterName;
-		return key.hashCode();
+		var code = key.hashCode();
+		return Math.abs(code);
 	}
 
 	/**

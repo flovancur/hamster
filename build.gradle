@@ -8,8 +8,9 @@ sourceCompatibility = '17'
 
 jar {
     manifest {
-        attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.console.CommandLineInterface'
+        attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.server.HamsterServerCommandLine'
     }
+    archiveName "hamster_server.jar"
 }
 
 repositories {

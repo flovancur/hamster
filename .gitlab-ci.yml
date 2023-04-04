@@ -31,10 +31,8 @@ test-code-job1:
     - 'chmod u+x gradle-build.sh'
     - 'chmod u+x gradlew'
     - './gradle-build.sh "$HTTP_PROXY" jar'
-    - 'chmod u+x scripts/testhamster.sh'
-    - 'cd scripts'
-    - './testhamster.sh -n > testresult.txt'
+    - 'java -jar tests/TestRunnerHamster.jar -P "java -jar build/libs/hamster_server.jar" -H "java -jar tests/hamster.jar" > testresult.txt'
   artifacts:
     when: always
     paths:
-      - 'scripts/testresult.txt'
+      - testresult.txt

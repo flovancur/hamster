@@ -59,9 +59,7 @@ private static Process sut = null;
 		HamsterTestDataStore.sleepMin();
 		if (sut != null) {
 			sut.destroy();
-
-			HamsterTestDataStore.sleepMin();
-
+			sut.waitFor();
 			assertFalse("Server process is not shuting down.", sut.isAlive());
 		}
 	}

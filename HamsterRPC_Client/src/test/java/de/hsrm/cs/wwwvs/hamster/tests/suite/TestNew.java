@@ -52,7 +52,7 @@ public class TestNew {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		try {
 			if (hmstr != null) {
 				hmstr.close();
@@ -63,7 +63,7 @@ public class TestNew {
 		} 
 
 		sut.destroy();
-		HamsterTestDataStore.sleepMin();
+		sut.waitFor();
 		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 

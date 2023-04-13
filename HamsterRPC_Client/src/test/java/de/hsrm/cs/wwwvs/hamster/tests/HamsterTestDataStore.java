@@ -22,9 +22,9 @@ public class HamsterTestDataStore {
 
 	private int port = 8088;
 	
-	private  static int sleepMin = 10;
-	private  static int sleepMed = 100;
-	private  static int sleepMax = 500;
+	private  static int sleepMin = 100;
+	private  static int sleepMed = 200;
+	private  static int sleepMax = 1000;
 	
 	public int testcaseTimeoutms = 60000;
 

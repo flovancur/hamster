@@ -58,7 +58,7 @@ public class TestHowsDoing {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		try {
 			if (hmstr != null) {
 				hmstr.close();
@@ -68,7 +68,7 @@ public class TestHowsDoing {
 			fail("Connection failed");
 		}
 		sut.destroy();
-		HamsterTestDataStore.sleepMin();
+		sut.waitFor();
 		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 

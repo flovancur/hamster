@@ -109,12 +109,8 @@ public class TestConnection {
 
 		// programm beenden
 		this.sut.destroy();
-
-		HamsterTestDataStore.sleepMin();
-
-
+		this.sut.waitFor();
 		assertFalse(this.sut.isAlive());
-
 	}
 
 	@Test

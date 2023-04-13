@@ -59,7 +59,7 @@ public class TestCornerCases {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		try {
 			if (hmstr != null) {
 				hmstr.close();
@@ -69,7 +69,7 @@ public class TestCornerCases {
 			fail("Connection failed");
 		}
 		sut.destroy();
-		HamsterTestDataStore.sleepMid();
+		sut.waitFor();
 		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 

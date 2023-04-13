@@ -55,7 +55,7 @@ public class TestCollect {
 		}
 		if (sut != null) {
 			sut.destroy();
-			HamsterTestDataStore.sleepMin();
+			sut.waitFor();
 			assertFalse("Server process is not shuting down.", sut.isAlive());
 		}
 	}

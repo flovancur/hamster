@@ -61,8 +61,8 @@ public class TestGiveTreats {
 
 		if (sut != null) {
 			sut.destroy();
+			sut.waitFor();
 		}
-		HamsterTestDataStore.sleepMin();
 
 		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}

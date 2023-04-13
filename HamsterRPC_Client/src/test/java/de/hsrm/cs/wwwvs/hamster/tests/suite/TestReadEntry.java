@@ -71,10 +71,9 @@ public class TestReadEntry {
 		HamsterTestDataStore.sleepMin();
 		if (sut != null) {
 			sut.destroy();
+			sut.waitFor();
+			assertFalse("Server process is not shuting down.", sut.isAlive());
 		}
-
-		HamsterTestDataStore.sleepMin();
-		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 
 	// testcase 1: test heinz

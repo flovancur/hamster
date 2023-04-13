@@ -50,7 +50,7 @@ public class TestMultipleClients {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDown() throws Exception {
 		try {
 			if (hmstr != null) {
 				hmstr.close();
@@ -59,9 +59,8 @@ public class TestMultipleClients {
 			e.printStackTrace();
 			fail("Connection failed");
 		}
-		HamsterTestDataStore.sleepMin();
 		sut.destroy();
-		HamsterTestDataStore.sleepMin();
+		sut.waitFor();
 		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 

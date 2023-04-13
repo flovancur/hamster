@@ -48,8 +48,7 @@ public class HamsterServerCommandLine {
 			}
 		}
 		try {
-			var server = new HamsterServer(hostName, port);
-			server.run();
+			System.exit(printRtfm());
 		}
 		catch (Exception ex) {
 			System.err.println("Server exception: " + ex.getMessage());

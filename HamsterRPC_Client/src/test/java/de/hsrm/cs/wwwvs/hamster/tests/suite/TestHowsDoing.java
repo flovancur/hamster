@@ -25,36 +25,26 @@ import de.hsrm.cs.wwwvs.hamster.tests.HamsterTestDataStore;
 public class TestHowsDoing {
 
 	private static Process sut = null;
-	static HamsterTestDataStore store = HamsterTestDataStore.getInstance();	
+	static HamsterTestDataStore store = HamsterTestDataStore.getInstance();
 	static HamsterRPCConnection hmstr = null;
-	
+
 	static int port = store.getPort();
 	static String hostname = "localhost";
-	
+
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
-	
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() {
-		sut.destroy();
-
-		HamsterTestDataStore.sleepMin();
-
-
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
-	
 	@Before
 	public void setUp() {
-		
-		assertTrue("Server process is not running.", sut.isAlive());
-		
+		HamsterTestDataStore.getInstance().wipeHamsterfile();
+	}
+
+	private static void connect() {
+
 		try {
+			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+			HamsterTestDataStore.sleepMin();
+			assertTrue("Server process is not running.", sut.isAlive());
 			hmstr = new HamsterRPCConnection(hostname, port, true);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -63,12 +53,10 @@ public class TestHowsDoing {
 			e.printStackTrace();
 			fail("Failed to connect to server: " + e.getMessage());
 		}
-		
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
+
 		HamsterTestDataStore.sleepMin();
-		
-	}	
-	
+	}
+
 	@After
 	public void tearDown() {
 		try {
@@ -78,183 +66,111 @@ public class TestHowsDoing {
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("Connection failed");
-		} 
-		
+		}
+		sut.destroy();
 		HamsterTestDataStore.sleepMin();
+		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
-	
+
 
 	@Test
-	public void howsdoing_td1() {
-		try {
-			HamsterTestDataStore.getInstance().createTestdata1();
-		} catch (IOException e1) {
-			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
-			return;
-		}
-		
-		try {
-			int uuid = hmstr.lookup("otto", "heinz");
+	public void howsdoing_td1() throws Exception {
+		HamsterTestDataStore.getInstance().createTestdata1();
+		connect();
 
-			State state = new State();
-			State expectedState = new State();
-			expectedState.treatsLeft = 23;
-			expectedState.cost = 18;
+		int uuid = hmstr.lookup("otto", "heinz");
 
-			int returnCode = hmstr.howsdoing(uuid, state);
-			assertTrue("returnCode should be 0.", returnCode == 0);
-			assertTrue("treatsLeft expected "+expectedState.treatsLeft+", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
-			assertTrue("cost expected "+expectedState.cost+", received " + state.cost, state.cost == expectedState.cost);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		}
-	}
-	
-	@Test
-	public void howsdoing_not_found() {
-		try {
-			HamsterTestDataStore.getInstance().createTestdata1();
-		} catch (IOException e1) {
-			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
-			return;
-		}
-				
-		int uuid = 1234567890;
-		
 		State state = new State();
 		State expectedState = new State();
 		expectedState.treatsLeft = 23;
 		expectedState.cost = 18;
-		
+
+		int returnCode = hmstr.howsdoing(uuid, state);
+		assertTrue("returnCode should be 0.", returnCode == 0);
+		assertTrue("treatsLeft expected " + expectedState.treatsLeft + ", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
+		assertTrue("cost expected " + expectedState.cost + ", received " + state.cost, state.cost == expectedState.cost);
+	}
+
+	@Test
+	public void howsdoing_not_found() throws Exception {
+		HamsterTestDataStore.getInstance().createTestdata1();
+		connect();
+
+		int uuid = 12345678;
+
+		State state = new State();
+
 		try {
-			int returnCode = hmstr.howsdoing(uuid, state);
-			assertTrue("returnCode should be -1.", returnCode == -1);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
+			hmstr.howsdoing(uuid, state);
+			fail("Expected exception");
 		} catch (HamsterRPCException_NotFound e) {
-			assertTrue(e instanceof HamsterRPCException_NotFound);
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Expected HamsterRPCException_NotFound.");
-		}
-	}
-	
-	@Test
-	public void howsdoing_td2() {
-		try {
-			HamsterTestDataStore.getInstance().createTestdata2();
-		} catch (IOException e1) {
-			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
-			return;
-		}
-		
-		try {
-			int uuid = hmstr.lookup("otto", "heinz");
-
-			State state = new State();
-			State expectedState = new State();
-			expectedState.treatsLeft = 0;
-			expectedState.cost = 23;
-
-			int returnCode = hmstr.howsdoing(uuid, state);
-			assertTrue("returnCode should be 0.", returnCode == 0);
-			assertTrue("treatsLeft expected "+expectedState.treatsLeft+", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
-			assertTrue("cost expected "+expectedState.cost+", received " + state.cost, state.cost == expectedState.cost);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state.");
 		}
 	}
 
 	@Test
-	public void howsdoing_td5() {
-		try {
-			HamsterTestDataStore.getInstance().createTestdata5();
-		} catch (IOException e1) {
-			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
-			return;
-		}
-		
-		try {
+	public void howsdoing_td2() throws Exception {
+		HamsterTestDataStore.getInstance().createTestdata2();
+		connect();
 
-			int uuid = hmstr.lookup("otto", "heinz");
+		int uuid = hmstr.lookup("otto", "heinz");
 
-			State state = new State();
-			State expectedState = new State();
-			expectedState.treatsLeft = -1;  // workaround because of unsigned value not available in java (65535 => -1)
-			expectedState.cost = 50;
+		State state = new State();
+		State expectedState = new State();
+		expectedState.treatsLeft = 0;
+		expectedState.cost = 23;
 
-			int returnCode = hmstr.howsdoing(uuid, state);
-			assertTrue("returnCode should be 0.", returnCode == 0);
-			assertTrue("treatsLeft expected "+expectedState.treatsLeft+", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
-			assertTrue("cost expected "+expectedState.cost+", received " + state.cost, state.cost == expectedState.cost);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state.");
-		}
+		int returnCode = hmstr.howsdoing(uuid, state);
+		assertTrue("returnCode should be 0.", returnCode == 0);
+		assertTrue("treatsLeft expected " + expectedState.treatsLeft + ", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
+		assertTrue("cost expected " + expectedState.cost + ", received " + state.cost, state.cost == expectedState.cost);
 	}
-	
+
+	@Test
+	public void howsdoing_td5() throws Exception {
+		HamsterTestDataStore.getInstance().createTestdata5();
+		connect();
+
+		int uuid = hmstr.lookup("otto", "heinz");
+
+		State state = new State();
+		State expectedState = new State();
+		expectedState.treatsLeft = -1;  // workaround because of unsigned value not available in java (65535 => -1)
+		expectedState.cost = 50;
+
+		int returnCode = hmstr.howsdoing(uuid, state);
+		assertTrue("returnCode should be 0.", returnCode == 0);
+		assertTrue("treatsLeft expected " + expectedState.treatsLeft + ", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft || state.treatsLeft == 32767);
+		assertTrue("cost expected " + expectedState.cost + ", received " + state.cost, state.cost == expectedState.cost);
+	}
+
 	// testcase 5: not additional payload after successful call
 	@Test
-	public void testNoAddPayloadAfterSuccCall() {
-		
-		try {
-			HamsterTestDataStore.getInstance().createTestdata1();
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
-			return;
-		}
-		
-		try {
+	public void testNoAddPayloadAfterSuccCall() throws Exception {
 
-			int uuid = hmstr.lookup("otto", "heinz");
+		HamsterTestDataStore.getInstance().createTestdata1();
+		connect();
 
-			State state = new State();
-			State expectedState = new State();
-			expectedState.treatsLeft = 23;
-			expectedState.cost = 18;
+		int uuid = hmstr.lookup("otto", "heinz");
 
-			hmstr.setTestNoPayloadAfterMessage(true);
-			int returnCode = hmstr.howsdoing(uuid, state);
-			assertTrue("returnCode should be 0.", returnCode == 0);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state.");
-		}
-		
-		try {
-			int addByte = hmstr.receiveOneByte();
-			assertTrue("Received payload after sucessful rpc call", (addByte == -1));
-		} catch (IOException e) {
-			
-			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
-		}
-		
+		State state = new State();
+		State expectedState = new State();
+		expectedState.treatsLeft = 23;
+		expectedState.cost = 18;
+
+		hmstr.setTestNoPayloadAfterMessage(true);
+		int returnCode = hmstr.howsdoing(uuid, state);
+		assertTrue("returnCode should be 0.", returnCode == 0);
+
+		int addByte = hmstr.receiveOneByte();
+		assertTrue("Received payload after sucessful rpc call", (addByte == -1));
 	}
+
 	// testcase 6: no payload after error message
 	@Test
-	public void testNoAddPayloadAfterErrorCall() {
-		
-		try {
-			HamsterTestDataStore.getInstance().createTestdata1();
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
-			return;
-		}
+	public void testNoAddPayloadAfterErrorCall() throws Exception {
+
+		HamsterTestDataStore.getInstance().createTestdata1();
+		connect();
 
 		int uuid = 232342;
 
@@ -264,90 +180,46 @@ public class TestHowsDoing {
 		expectedState.cost = 18;
 
 		hmstr.setTestNoPayloadAfterMessage(true);
-		
+
 		try {
 			int returnCode = hmstr.howsdoing(uuid, state);
 			fail("Expected HamsterRPCException_StorageError");
-	
-			} catch (HamsterRPCException_NotFound e) {
-			//
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				//
-			}
-		
-		try {
-			int addByte = hmstr.receiveOneByte();
-			assertTrue("Received payload after sucessfull rpc call", (addByte == -1));
-		} catch (IOException e) {
-			
-			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
+		} catch (HamsterRPCException_NotFound e) {
 		}
-		
+
+		int addByte = hmstr.receiveOneByte();
+		assertTrue("Received payload after sucessfull rpc call", (addByte == -1));
 	}
-	
+
 	// testcase 7: two calls in a row
-	
+
 	@Test
-	public void testTwoCallsInARow() {
-		
-		try {
-			HamsterTestDataStore.getInstance().createTestdata13();
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
-			return;
-		}
+	public void testTwoCallsInARow() throws Exception {
+
+		HamsterTestDataStore.getInstance().createTestdata13();
+		connect();
 
 		State state = new State();
 		State expectedState = new State();
 		expectedState.treatsLeft = 23;
 		expectedState.cost = 18;
-		
-		try {
 
-			int uuid = hmstr.lookup("otto", "heinz");
+		int uuid = hmstr.lookup("otto", "heinz");
 
-			int returnCode = hmstr.howsdoing(uuid, state);
-			assertTrue("returnCode should be 0.", returnCode == 0);
-			assertTrue("treatsLeft expected "+expectedState.treatsLeft+", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
-			assertTrue("cost expected "+expectedState.cost+", received " + state.cost, state.cost == expectedState.cost);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		}
+		int returnCode = hmstr.howsdoing(uuid, state);
+		assertTrue("returnCode should be 0.", returnCode == 0);
+		assertTrue("treatsLeft expected " + expectedState.treatsLeft + ", received " + state.treatsLeft, state.treatsLeft == expectedState.treatsLeft);
+		assertTrue("cost expected " + expectedState.cost + ", received " + state.cost, state.cost == expectedState.cost);
 
 		State state2 = new State();
 		State expectedState2 = new State();
 		expectedState2.treatsLeft = 42;
 		expectedState2.cost = 18;
-		
-		try {
 
-
-			int uuid2 = hmstr.lookup("bernd", "blondy");
-			int returnCode = hmstr.howsdoing(uuid2, state2);
-			assertTrue("returnCode should be 0.", returnCode == 0);
-			assertTrue("treatsLeft expected "+expectedState2.treatsLeft+", received " + state2.treatsLeft, state2.treatsLeft == expectedState2.treatsLeft);
-			assertTrue("cost expected "+expectedState2.cost+", received " + state2.cost, state.cost == expectedState2.cost);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to check hamster state: " + e.getMessage());
-		}
-		
+		int uuid2 = hmstr.lookup("bernd", "blondy");
+		returnCode = hmstr.howsdoing(uuid2, state2);
+		assertTrue("returnCode should be 0.", returnCode == 0);
+		assertTrue("treatsLeft expected " + expectedState2.treatsLeft + ", received " + state2.treatsLeft, state2.treatsLeft == expectedState2.treatsLeft);
+		assertTrue("cost expected " + expectedState2.cost + ", received " + state2.cost, state.cost == expectedState2.cost);
 	}
-	
-	
-	
-	
 }

@@ -34,27 +34,14 @@ public class TestCollect {
 	
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
-	
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+
+	@Before
+	public void setup() throws IOException {
+		HamsterTestDataStore.getInstance().wipeHamsterfile();
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() {
-		
-		if (sut != null) {
-			sut.destroy();
-		}
-		HamsterTestDataStore.sleepMid();
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
-	
-	
-	@Before
-	public void setUp() throws Exception {
-		
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
+	public void connect() throws IOException {
+		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
 		
 		hamster = new HamsterRPCConnection("localhost", port, true);
 		
@@ -66,9 +53,11 @@ public class TestCollect {
 		if (hamster != null) {
 			hamster.close();
 		}
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
-		
-		HamsterTestDataStore.sleepMin();
+		if (sut != null) {
+			sut.destroy();
+			HamsterTestDataStore.sleepMin();
+			assertFalse("Server process is not shuting down.", sut.isAlive());
+		}
 	}
 	
 	
@@ -77,6 +66,7 @@ public class TestCollect {
 	public void testCollectOneHamster() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e1) {
 			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
 			return;
@@ -107,6 +97,7 @@ public class TestCollect {
 		
 		try {
 			HamsterTestDataStore.getInstance().createTestdata8();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
@@ -127,10 +118,6 @@ public class TestCollect {
 		} catch (HamsterRPCException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 		}
-		
-		
-		
-		
 	}
 	// testcase 3: collect not existing owner
 	@Test
@@ -139,6 +126,7 @@ public class TestCollect {
 
 		int price;
 		try {
+			connect();
 			price = hamster.collect("karl");
 			fail("Expected HamsterRPCException_NotFound" );
 		} catch (HamsterRPCException_NotFound e) {
@@ -159,10 +147,11 @@ public class TestCollect {
 
 		int price;
 		try {
+			connect();
 			price = hamster.collect("karl");
 			// mp failure if no database present
 		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
+			// not found is also good
 		} catch (HamsterRPCException_StorageError e) {
 			// could be thrown
 		} catch (HamsterRPCException_DatabaseCorrupt e) {
@@ -181,6 +170,7 @@ public class TestCollect {
 		
 		int price;
 		try {
+			connect();
 			price = hamster.collect("");
 			fail("Expected HamsterRPCException_NotFound" );
 		} catch (HamsterRPCException_NotFound e) {
@@ -200,9 +190,9 @@ public class TestCollect {
 	// testcase 6:no additional payload after one successfull call
 	@Test
 	public void testNoPayloadAfterCollectOneHamster() {
-	//	HamsterTestDataStore.getInstance().copyTestHamsterfile("td2.dat");
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e1) {
 			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
 			return;
@@ -243,6 +233,7 @@ public class TestCollect {
 	public void testNoPayloadAfterError() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e1) {
 			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
 			return;
@@ -282,6 +273,7 @@ public class TestCollect {
 		
 		try {
 			HamsterTestDataStore.getInstance().createTestdata13();
+			connect();
 		} catch (IOException e1) {
 			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
 			return;

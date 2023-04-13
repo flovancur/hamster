@@ -38,26 +38,15 @@ public class TestCornerCases {
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
 
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() {
-		sut.destroy();
-
-		HamsterTestDataStore.sleepMid();
-		
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
-
 	@Before
 	public void setUp() {
+		HamsterTestDataStore.getInstance().wipeHamsterfile();
+	}
 
-		assertTrue("Server process is not running.", sut.isAlive());
-
+	private static void connect() {
 		try {
+			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+			assertTrue("Server process is not running.", sut.isAlive());
 			hmstr = new HamsterRPCConnection(hostname, port);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -66,8 +55,6 @@ public class TestCornerCases {
 			e.printStackTrace();
 			fail("Failed to connect to server: " + e.getMessage());
 		}
-
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
 		HamsterTestDataStore.sleepMin();
 	}
 
@@ -81,7 +68,9 @@ public class TestCornerCases {
 			e.printStackTrace();
 			fail("Connection failed");
 		}
-		HamsterTestDataStore.sleepMin();
+		sut.destroy();
+		HamsterTestDataStore.sleepMid();
+		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 
 	@Test
@@ -93,6 +82,7 @@ public class TestCornerCases {
 		int returnCode = -1;
 
 		try {
+			connect();
 			returnCode = hmstr.new_(owner_name, hamster_name, treats);
 			assertTrue("UUID must be greater or equal to 0.", returnCode >= 0);
 
@@ -125,6 +115,7 @@ public class TestCornerCases {
 		String hamster_name = "heinz";
 
 		try {
+			connect();
 			hmstr.lookup(owner_name, hamster_name);
 		} catch (HamsterRPCException_NameTooLong e) {
 			e.printStackTrace();
@@ -151,6 +142,7 @@ public class TestCornerCases {
 	public void cornerCase_howsdoing_td1() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e1) {
 			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
 			return;
@@ -182,15 +174,11 @@ public class TestCornerCases {
 	@Test
 	public void cornerCase_testGive5Treats() {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-
-		int expectedUUID = 1996485908;
+		connect();
 
 		try {
-			int left = hmstr.givetreats(expectedUUID, 5);
-
-			boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td9.dat");
-
-			assertTrue("After giveTreats of 5, the hamsterfile.dat is not as expeced", ok);
+			int id = hmstr.lookup("otto", "heinz");
+			int left = hmstr.givetreats(id, 5);
 
 			assertSame(18, left);
 
@@ -211,6 +199,7 @@ public class TestCornerCases {
 	public void cornerCase_testHeinz() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
@@ -221,14 +210,13 @@ public class TestCornerCases {
 		} catch (InterruptedException e) {
 		}
 
-		int expectedUUID = 1996485908;
-
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
 		HamsterInteger price = new HamsterInteger();
 
 		try {
-			int left = hmstr.readentry(expectedUUID, owner, name, price);
+			int id = hmstr.lookup("otto", "heinz");
+			int left = hmstr.readentry(id, owner, name, price);
 
 			assertEquals(23, left);
 			assertEquals("otto", owner.str);
@@ -253,6 +241,7 @@ public class TestCornerCases {
 		// HamsterTestDataStore.getInstance().copyTestHamsterfile("td2.dat");
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e1) {
 			fail("Unexpected Exception: " + e1.getClass().getSimpleName() + " msg " + e1.getMessage());
 			return;

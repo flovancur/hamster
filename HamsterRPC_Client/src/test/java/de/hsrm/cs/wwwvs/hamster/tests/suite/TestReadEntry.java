@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
@@ -39,31 +40,24 @@ public class TestReadEntry {
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
 
 
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() {
-
-		if (sut != null) {
-			sut.destroy();
-		}
-
-		HamsterTestDataStore.sleepMin();
-
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
-
-
 	@Before
 	public void setUp() throws Exception {
-
 		HamsterTestDataStore.getInstance().wipeHamsterfile();
+	}
 
-		hamster = new HamsterRPCConnection("localhost", port, true);
+	private void connect() {
 
+		try {
+			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+			assertTrue("Server process is not running.", sut.isAlive());
+			hamster = new HamsterRPCConnection("localhost", port, true);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			fail("Failed to connect to server: " + e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Failed to connect to server: " + e.getMessage());
+		}
 		HamsterTestDataStore.sleepMin();
 	}
 
@@ -74,10 +68,13 @@ public class TestReadEntry {
 			hamster.close();
 		}
 
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
+		HamsterTestDataStore.sleepMin();
+		if (sut != null) {
+			sut.destroy();
+		}
 
 		HamsterTestDataStore.sleepMin();
-
+		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 
 	// testcase 1: test heinz
@@ -85,20 +82,19 @@ public class TestReadEntry {
 	public void testHeinz() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
 		}
-
-
-		int expectedUUID = 1996485908;
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
 		HamsterInteger price = new HamsterInteger();
 
 		try {
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			var id = hamster.lookup("otto", "heinz");
+			int left = hamster.readentry(id, owner, name, price);
 
 			assertEquals(23, left);
 			assertEquals("otto", owner.str);
@@ -124,11 +120,8 @@ public class TestReadEntry {
 	// testcase 2: test large name
 	@Test
 	public void testLargeName() {
-
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td3.dat");
-
-		int expectedUUID = 251468589;
-
+		connect();
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
@@ -141,7 +134,7 @@ public class TestReadEntry {
 			System.out.println("id " + id);
 
 
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			int left = hamster.readentry(id, owner, name, price);
 
 
 			assertEquals("diesnameee123456789012345678901", owner.str);
@@ -169,16 +162,14 @@ public class TestReadEntry {
 	@Test
 	public void testNonExtID() {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td3.dat");
-
-
-		int expectedUUID = 8987687;
+		connect();
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
 		HamsterInteger price = new HamsterInteger();
 
 		try {
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			int left = hamster.readentry(42, owner, name, price);
 
 			fail("Expected HamsterRPCException_NotFound");
 
@@ -203,10 +194,7 @@ public class TestReadEntry {
 	public void testDoubleLargeName() {
 
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td4.dat");
-
-
-		int expectedUUID = 1762128686;
-
+		connect();
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
@@ -214,12 +202,9 @@ public class TestReadEntry {
 
 		try {
 
-			//		int id = hamster.lookup("diesnameee123456789012345678901", "diesnameee123456789012345678902");
+			int id = hamster.lookup("diesnameee123456789012345678901", "diesnameee123456789012345678902");
 
-			//		System.out.println("id " + id);
-
-
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			int left = hamster.readentry(id, owner, name, price);
 
 
 			assertEquals("diesnameee123456789012345678901", owner.str);
@@ -249,19 +234,19 @@ public class TestReadEntry {
 	public void testMaxPrice() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata11();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
 		}
-
-		int expectedUUID = 1996485908;
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
 		HamsterInteger price = new HamsterInteger();
 
 		try {
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			int id = hamster.lookup("otto", "heinz");
+			int left = hamster.readentry(id, owner, name, price);
 
 
 			assertEquals(32765, price.i);
@@ -290,13 +275,11 @@ public class TestReadEntry {
 	public void testNoPayloadAfterSuccessCall() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
 		}
-
-
-		int expectedUUID = 1996485908;
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
@@ -305,13 +288,11 @@ public class TestReadEntry {
 		hamster.setTestNoPayloadAfterMessage(true);
 
 		try {
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			int id = hamster.lookup("otto", "heinz");
+			int left = hamster.readentry(id, owner, name, price);
 
-			//	assertEquals(23, left);
-			//	assertEquals("otto", owner.str);
-			//	assertEquals("heinz", name.str);
-			//	assertEquals(17, price.i);
-
+			assertEquals("otto", owner.str);
+			assertEquals("heinz", name.str);
 
 		} catch (HamsterRPCException_NotFound e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName());
@@ -341,13 +322,11 @@ public class TestReadEntry {
 	public void testNoPayloadAfterError() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
 		}
-
-
-		int expectedUUID = 1996485908;
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
@@ -356,9 +335,7 @@ public class TestReadEntry {
 		hamster.setTestNoPayloadAfterMessage(true);
 
 		try {
-			int left = hamster.readentry(2342, owner, name, price);
-
-
+			hamster.readentry(2342, owner, name, price);
 		} catch (HamsterRPCException_NotFound e) {
 			//
 		} catch (HamsterRPCException_StorageError e) {
@@ -386,20 +363,21 @@ public class TestReadEntry {
 	public void testTwoCalls() {
 		try {
 			HamsterTestDataStore.getInstance().createTestdata1();
+			connect();
 		} catch (IOException e) {
 			fail("Unexpected Exception: " + e.getClass().getSimpleName() + " msg " + e.getMessage());
 			return;
 		}
 
-
-		int expectedUUID = 1996485908;
+		int id = 0;
 
 		HamsterString owner = new HamsterString();
 		HamsterString name = new HamsterString();
 		HamsterInteger price = new HamsterInteger();
 
 		try {
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			id = hamster.lookup("otto", "heinz");
+			int left = hamster.readentry(id, owner, name, price);
 
 			assertEquals(23, left);
 			assertEquals("otto", owner.str);
@@ -420,7 +398,7 @@ public class TestReadEntry {
 		}
 
 		try {
-			int left = hamster.readentry(expectedUUID, owner, name, price);
+			int left = hamster.readentry(id, owner, name, price);
 
 			assertEquals(23, left);
 			assertEquals("otto", owner.str);

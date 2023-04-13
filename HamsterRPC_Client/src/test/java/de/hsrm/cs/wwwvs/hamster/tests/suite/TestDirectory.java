@@ -37,32 +37,15 @@ private static Process sut = null;
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
 	
 	
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() {
-		
-		if (sut != null) {
-			sut.destroy();
-			
-			HamsterTestDataStore.sleepMin();
-
-			assertFalse("Server process is not shuting down.", sut.isAlive());
-		}
-
-		
-		
-	}
-	
-	
 	@Before
 	public void setUp() throws Exception {
 		
 		HamsterTestDataStore.getInstance().wipeHamsterfile();
-		
+	}
+
+	private void connect() throws IOException {
+		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+
 		hamster = new HamsterRPCConnection("localhost", port, true);
 		HamsterTestDataStore.sleepMin();
 	}
@@ -73,468 +56,223 @@ private static Process sut = null;
 		if (hamster != null) {
 			hamster.close();
 		}
-		
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
-		
 		HamsterTestDataStore.sleepMin();
-		
-		
+		if (sut != null) {
+			sut.destroy();
+
+			HamsterTestDataStore.sleepMin();
+
+			assertFalse("Server process is not shuting down.", sut.isAlive());
+		}
 	}
 	
 	// testcase 1: einmal alle (1x heinz)
 	@Test
-	public void testAllHamster1() {
-	
-		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-	
+	public void testAllHamster1() throws Exception {
 
-		
+		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
+
 		HamsterHandle fdptr = new HamsterHandle();
-		
+
+		connect();
+		int expectedUUID = hamster.lookup("otto", "heinz");
+
+		fdptr.fdptr = -1;
+
+		int uuid = hamster.directory(fdptr, null, null);
+
+		assertEquals(expectedUUID, uuid);
+		assertNotEquals(-1, fdptr.fdptr);
+
 		try {
-			int expectedUUID = hamster.lookup("otto", "heinz");
-			
-			fdptr.fdptr = -1;
-			
-			int uuid = hamster.directory(fdptr, null, null);
-			
-			assertEquals(expectedUUID, uuid);
-			assertNotEquals(-1, fdptr.fdptr);
-			
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		
-		try {
-			
-			
-			int uuid = hamster.directory(fdptr, null, null);
-			
+			hamster.directory(fdptr, null, null);
 			fail("Expected HamsterRPCException_NotFound");
-			
-			
 		} catch (HamsterRPCException_NotFound e) {
-			
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
 		}
-		
-		
 	}
+
 	// testcase 2: einmal alle (zwei Hamster)
 	@Test
-	public void testAllHamster2() {
-	
+	public void testAllHamster2() throws Exception {
+
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td7.dat");
-	
+
 
 		HamsterHandle fdptr = new HamsterHandle();
-		try {
-			int expectedUUID = hamster.lookup("otto", "heinz");
+		connect();
+		int expectedUUID = hamster.lookup("otto", "heinz");
 
-			fdptr.fdptr = -1;
-			
-			int uuid = hamster.directory(fdptr, null, null);
-			
-			assertEquals(expectedUUID, uuid);
-			assertNotEquals(-1, fdptr.fdptr);
-			
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		
+		fdptr.fdptr = -1;
+
+		int uuid = hamster.directory(fdptr, null, null);
+
+		assertEquals(expectedUUID, uuid);
+		assertNotEquals(-1, fdptr.fdptr);
+
+		uuid = hamster.directory(fdptr, null, null);
+
+		assertEquals(hamster.lookup("karl", "blondy"), uuid);
+		assertNotEquals(-1, fdptr.fdptr);
+
 		try {
-			
-			int uuid = hamster.directory(fdptr, null, null);
-			
-			assertEquals(hamster.lookup("karl", "blondy"), uuid);
-			assertNotEquals(-1, fdptr.fdptr);
-			
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		
-		try {
-			
-			
-			int uuid = hamster.directory(fdptr, null, null);
-			
+			uuid = hamster.directory(fdptr, null, null);
 			fail("Expected HamsterRPCException_NotFound");
-			
-			
 		} catch (HamsterRPCException_NotFound e) {
-			
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
 		}
-		
 	}
+
 	// testcase 3: einmal alle (50 Hamster)
 	@Test
-	public void testAllHamster50() {
-	
-		HamsterTestDataStore.getInstance().copyTestHamsterfile("td6.dat");
-		
-		HamsterHandle fdptr = new HamsterHandle();
-		try {
-			
-			fdptr.fdptr = -1;
-			int count = 0;
-			
-			for (int i = 1; i < 50; i++) {
+	public void testAllHamster50() throws Exception {
 
-				var ownerName = "otto" + i;
-				var hamsterName = "heinz" + i;
-				var id = hamster.lookup(ownerName, hamsterName);
-				int uuid = hamster.directory(fdptr, null, null);
-				
-				assertEquals(id, uuid);
-				assertNotEquals(-1, fdptr.fdptr);
-				count++;
-			}
-			
-			assertEquals(49, count);
-			
-		
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		
-		try {
-			
-			
+		HamsterTestDataStore.getInstance().copyTestHamsterfile("td6.dat");
+
+		HamsterHandle fdptr = new HamsterHandle();
+		connect();
+
+		fdptr.fdptr = -1;
+
+		for (int i = 1; i <= 50; i++) {
+			var ownerName = "otto" + i;
+			var hamsterName = "heinz" + i;
+			var id = hamster.lookup(ownerName, hamsterName);
 			int uuid = hamster.directory(fdptr, null, null);
-			
-			fail("Expected HamsterRPCException_NotFound");
-			
-			
-		} catch (HamsterRPCException_NotFound e) {
-			
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
+
+			assertEquals(id, uuid);
+			assertNotEquals(-1, fdptr.fdptr);
 		}
-		
+
+		try {
+			hamster.directory(fdptr, null, null);
+			fail("Expected HamsterRPCException_NotFound");
+		} catch (HamsterRPCException_NotFound e) {
+		}
 	}
+
 	// testcase 4: einmal alle von otto (1x)
 	@Test
-	public void testAllHamsterOtto() {
-	
-	
+	public void testAllHamsterOtto() throws Exception {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td7.dat");
 		HamsterHandle fdptr = new HamsterHandle();
+		connect();
+		int expectedUUID = hamster.lookup("otto", "heinz");
+
+		fdptr.fdptr = -1;
+
+		int uuid = hamster.directory(fdptr, "otto", null);
+
+		assertEquals(expectedUUID, uuid);
+		assertNotEquals(-1, fdptr.fdptr);
+
 		try {
-			int expectedUUID = hamster.lookup("otto", "heinz");
-			
-			fdptr.fdptr = -1;
-			
-			int uuid = hamster.directory(fdptr, "otto", null);
-			
-			assertEquals(expectedUUID, uuid);
-			assertNotEquals(-1, fdptr.fdptr);
-			
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		
-		
-		try {
-			
-			
-			int uuid = hamster.directory(fdptr, "otto", null);
-			
+			hamster.directory(fdptr, "otto", null);
 			fail("Expected HamsterRPCException_NotFound");
-			
-			
 		} catch (HamsterRPCException_NotFound e) {
-			
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
 		}
-		
 	}
+
 	// testcase 5: einmal alle von otto (2x)
 		@Test
-		public void testAllHamsterOtto2() {
-		
+		public void testAllHamsterOtto2() throws Exception {
+
 			try {
 				HamsterTestDataStore.getInstance().createTestdata8();
+				connect();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 
-			
-			HamsterHandle fdptr = new HamsterHandle();
-			try {
 
-				int expectedUUID = hamster.lookup("otto", "heinz");
-				
-				fdptr.fdptr = -1;
-				
-				int uuid = hamster.directory(fdptr, "otto", null);
-				
-				assertEquals(expectedUUID, uuid);
-				assertNotEquals(-1, fdptr.fdptr);
-				
-				
-			} catch (HamsterRPCException_NotFound e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			}
-			
+			HamsterHandle fdptr = new HamsterHandle();
+			int expectedUUID = hamster.lookup("otto", "heinz");
+
+			fdptr.fdptr = -1;
+
+			int uuid = hamster.directory(fdptr, "otto", null);
+
+			assertEquals(expectedUUID, uuid);
+			assertNotEquals(-1, fdptr.fdptr);
+
+			uuid = hamster.directory(fdptr, "otto", null);
+
+			assertEquals(hamster.lookup("otto", "blondy"), uuid);
+			assertNotEquals(-1, fdptr.fdptr);
+
 			try {
-				
-				int uuid = hamster.directory(fdptr, "otto", null);
-				
-				assertEquals(hamster.lookup("otto", "blondy"), uuid);
-				assertNotEquals(-1, fdptr.fdptr);
-				
-				
-			} catch (HamsterRPCException_NotFound e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			}
-			
-			try {
-				
-				
-				int uuid = hamster.directory(fdptr, null, null);
-				
+				uuid = hamster.directory(fdptr, null, null);
 				fail("Expected HamsterRPCException_NotFound");
-				
-				
 			} catch (HamsterRPCException_NotFound e) {
-				
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
 			}
-			
 		}
-	// testcase 6: einmal alle von goldies (1x)
+
+		// testcase 6: einmal alle von goldies (1x)
 		@Test
-		public void testAllHamsterBlondy() {
-		
-		
+		public void testAllHamsterBlondy() throws Exception {
+
 			try {
 				HamsterTestDataStore.getInstance().createTestdata8();
+				connect();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				fail();
 			}
-		
 
-			
+
 			HamsterHandle fdptr = new HamsterHandle();
-			try {
+			int expectedUUID = hamster.lookup("otto", "blondy");
 
-				int expectedUUID = hamster.lookup("otto", "blondy");
-				
-				fdptr.fdptr = -1;
-				
-				int uuid = hamster.directory(fdptr, null, "blondy");
-				
-				assertEquals(expectedUUID, uuid);
-				assertNotEquals(-1, fdptr.fdptr);
-				
-			} catch (HamsterRPCException_NotFound e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			}
-			
-			
+			fdptr.fdptr = -1;
+
+			int uuid = hamster.directory(fdptr, null, "blondy");
+
+			assertEquals(expectedUUID, uuid);
+			assertNotEquals(-1, fdptr.fdptr);
+
 			try {
-				
-				
-				int uuid = hamster.directory(fdptr, "blondy", null);
-				
+				uuid = hamster.directory(fdptr, "blondy", null);
 				fail("Expected HamsterRPCException_NotFound");
-				
-				
 			} catch (HamsterRPCException_NotFound e) {
-				
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
 			}
-			
 		}
-	// testcase 7: einmal alle von goldies (2x)
+
+		// testcase 7: einmal alle von goldies (2x)
 		@Test
-		public void testAllHamsterBlondy2() {
-		
+		public void testAllHamsterBlondy2() throws Exception {
+
 			assertTrue(HamsterTestDataStore.getInstance().copyTestHamsterfile("td12.dat"));
 
-			
 			HamsterHandle fdptr = new HamsterHandle();
+			connect();
+			int expectedUUID = hamster.lookup("otto", "blondy");
+
+			fdptr.fdptr = -1;
+
+			int uuid = hamster.directory(fdptr, null, "blondy");
+
+			assertEquals(expectedUUID, uuid);
+			assertNotEquals(-1, fdptr.fdptr);
+
+			uuid = hamster.directory(fdptr, null, "blondy");
+
+			assertEquals(hamster.lookup("hans", "blondy"), uuid);
+			assertNotEquals(-1, fdptr.fdptr);
+
 			try {
-				int expectedUUID = hamster.lookup("otto", "blondy");
-				
-				fdptr.fdptr = -1;
-				
-				int uuid = hamster.directory(fdptr, null, "blondy");
-				
-				assertEquals(expectedUUID, uuid);
-				assertNotEquals(-1, fdptr.fdptr);
-				
-				
-			} catch (HamsterRPCException_NotFound e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			}
-			
-			try {
-				
-				int uuid = hamster.directory(fdptr, null, "blondy");
-				
-				assertEquals(hamster.lookup("hans", "blondy"), uuid);
-				assertNotEquals(-1, fdptr.fdptr);
-				
-				
-			} catch (HamsterRPCException_NotFound e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			}
-			
-			try {
-				
 				hamster.directory(fdptr, null, "blondy");
 				fail("Expected HamsterRPCException_NotFound");
-				
 			} catch (HamsterRPCException_NotFound e) {
-				
-			} catch (HamsterRPCException_StorageError e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
 			}
-			
 		}
-	// testcase 8: falscher fdptr
+
+		// testcase 8: falscher fdptr
 		@Test
-		public void testWrongFdptr() {
+		public void testWrongFdptr() throws Exception {
 		
 			HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
 			HamsterHandle fdptr = new HamsterHandle();
 			
 			try {
+				connect();
 				
 				fdptr.fdptr = 3849;
 				
@@ -542,16 +280,7 @@ private static Process sut = null;
 				
 				// do not necessarily expect storage error
 				
-			} catch (HamsterRPCException_NotFound e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
 			} catch (HamsterRPCException_StorageError e) {
-				
-			} catch (HamsterRPCException_DatabaseCorrupt e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (IOException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
-			} catch (HamsterRPCException e) {
-				fail("Unexpected Exception: " + e.getClass().getSimpleName());
 			}
 		}
 	

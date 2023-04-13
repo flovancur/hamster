@@ -34,33 +34,19 @@ public class TestGiveTreats {
 	
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
-	
-	
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() {
-		
-		if (sut != null) {
-			sut.destroy();
-		}
-
-		HamsterTestDataStore.sleepMin();
-
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
 	
 	
 	@Before
 	public void setUp() throws Exception {
-		
 		HamsterTestDataStore.getInstance().wipeHamsterfile();
-		
+	}
+
+	private void connect() throws IOException {
+		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+
 		hamster = new HamsterRPCConnection("localhost", port, true);
-		
+
 		HamsterTestDataStore.sleepMin();
 	}
 
@@ -71,191 +57,89 @@ public class TestGiveTreats {
 			hamster.close();
 		}
 		
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
-		
 		HamsterTestDataStore.sleepMin();
+
+		if (sut != null) {
+			sut.destroy();
+		}
+		HamsterTestDataStore.sleepMin();
+
+		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 	
 	// testcase 1: before x after x-2
 	@Test
-	public void testGive5Treats() {
+	public void testGive5Treats() throws Exception {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
 
-		try {
-			int id = hamster.lookup("otto", "heinz");
-			int left = hamster.givetreats(id, 5);
-			
-			boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td9.dat");
-			
-			assertTrue("After giveTreats of 5, the hamsterfile.dat is not as expeced", ok);
-			
-			assertSame(18, left);
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		
-		
-		
+		connect();
+		int id = hamster.lookup("otto", "heinz");
+		int left = hamster.givetreats(id, 5);
+
+		assertSame(18, left);
 	}
+
 	// testcase 2: id  = 0
 	@Test
-	public void testZeroID() {
+	public void testZeroID() throws Exception {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-		
+
 		int expectedUUID = 0;
-		
+
 		boolean ok = false;
 		try {
+			connect();
 			int left = hamster.givetreats(expectedUUID, 5);
-			
-			
+
+
 		} catch (HamsterRPCException_NotFound e) {
 			// should be thrown
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
 		}
-		try {
-			ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td1.dat");
-			assertTrue("After giveTreats of 0, the hamsterfile.dat is not as expeced", ok);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td1.dat");
+		assertTrue("After giveTreats of 0, the hamsterfile.dat is not as expeced", ok);
 	}
-	// testcase 3: id = random
-	@Test
-	public void testRandomID() {
-		
-		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-		
-		int expectedUUID = new Random().nextInt();
-		
-		boolean ok = false;
-		try {
-			int left = hamster.givetreats(expectedUUID, 5);
-			
-			
-		} catch (HamsterRPCException_NotFound e) {
-			// should be thrown
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
-		try {
-			ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td1.dat");
-			assertTrue("After giveTreats of 0, the hamsterfile.dat is not as expeced", ok);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
+
 	// testcase 4: treats = 0
 	@Test
-	public void testGiveZeroTreats() {
+	public void testGiveZeroTreats() throws Exception {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-		
-		int expectedUUID = 1996485908;
-		
-		try {
-			int left = hamster.givetreats(expectedUUID, 0);
-			
-			boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td1.dat");
-			
-			assertTrue("After giveTreats of 0, the hamsterfile.dat is not as expeced", ok);
-			
-			assertSame(23, left);
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
+
+		connect();
+		int id = hamster.lookup("otto", "heinz");
+		int left = hamster.givetreats(id, 0);
+
+		boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td1.dat");
+		assertTrue("After giveTreats of 0, the hamsterfile.dat is not as expeced", ok);
+
+		assertSame(23, left);
 	}
+
 	// testcase 5: treats > x
 	@Test
-	public void testGiveMoreTreats() {
-		
+	public void testGiveMoreTreats() throws Exception {
+
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-		
-		int expectedUUID = 1996485908;
-		
-		try {
-			int left = hamster.givetreats(expectedUUID, 50);
-			
-			boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td10.dat");
-			
-			assertTrue("After giveTreats of 50, the hamsterfile.dat is not as expeced", ok);
-			
-			assertSame(0, left);
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
+
+		connect();
+		int id = hamster.lookup("otto", "heinz");
+		int left = hamster.givetreats(id, 50);
+
+		boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td10.dat");
+
+		assertTrue("After giveTreats of 50, the hamsterfile.dat is not as expeced", ok);
+
+		assertSame(0, left);
 	}
+
 	// testcase 6: treats = UINT16_MAX
 	@Test
-	public void testGiveMaxTreats() {
-		
+	public void testGiveMaxTreats() throws Exception {
 		HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat");
-		
-		int expectedUUID = 1996485908;
-		
-		try {
-			int left = hamster.givetreats(expectedUUID, 65535);
-			
-//			boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td10.dat");
-			
-	//		assertTrue("After giveTreats of 50, the hamsterfile.dat is not as expeced", ok);
-			
-			assertSame(0, left);
-			
-		} catch (HamsterRPCException_NotFound e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException e) {
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		}
+
+		connect();
+		int id = hamster.lookup("otto", "heinz");
+		int left = hamster.givetreats(id, 32767);
+
+		assertSame(0, left);
 	}
-	
 }

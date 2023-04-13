@@ -64,17 +64,15 @@ public class TestHelper {
 		try {
 			this.sut = Runtime.getRuntime().exec(this.sutPath + " -p 8088");
 		} catch (IOException e) {
-			fail("SUT laesst sich nicht startetn");
+			fail("SUT laesst sich nicht starten");
 		}
 		
 		HamsterRPCConnection hamster = null;
 		try {
 			hamster = new HamsterRPCConnection("localhost", 8088);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -82,10 +80,8 @@ public class TestHelper {
 		try {
 			hamster.new_("otto", "heinz", 23);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (HamsterRPCException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -93,7 +89,6 @@ public class TestHelper {
 			boolean ok = HamsterTestDataStore.getInstance().compareHamsterFileEqual("td1.dat");
 			assertTrue(ok);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

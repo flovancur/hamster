@@ -24,7 +24,7 @@ import de.hsrm.cs.wwwvs.hamster.tests.HamsterTestDataStore;
 
 public class TestLookup {
 
-	private static Process sut = null;
+	private Process sut = null;
 	static HamsterTestDataStore store = HamsterTestDataStore.getInstance();	
 	static HamsterRPCConnection hmstr = null;
 	
@@ -33,27 +33,17 @@ public class TestLookup {
 	
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
-	
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() {
-		sut.destroy();
-
-		HamsterTestDataStore.sleepMin();
-
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
-	
 	@Before
 	public void setUp() {
-		
-		assertTrue("Server process is not running.", sut.isAlive());
-		
+		HamsterTestDataStore.getInstance().wipeHamsterfile();
+	}
+
+	private void connect() {
+
 		try {
+			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+			assertTrue("Server process is not running.", sut.isAlive());
 			hmstr = new HamsterRPCConnection(hostname, port, true);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -62,13 +52,10 @@ public class TestLookup {
 			e.printStackTrace();
 			fail("Failed to connect to server: " + e.getMessage());
 		}
-		
-		HamsterTestDataStore.getInstance().wipeHamsterfile();
-		
+
 		HamsterTestDataStore.sleepMin();
-		
-	}	
-	
+	}
+
 	@After
 	public void tearDown() {
 		try {
@@ -79,12 +66,17 @@ public class TestLookup {
 			e.printStackTrace();
 			fail("Connection failed");
 		} 
+		if (sut != null) {
+			sut.destroy();
+		}
 		HamsterTestDataStore.sleepMin();
+		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 
 	@Test
 	public void lookup_td1() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
+		connect();
 		
 		String owner_name = "otto";
 		String hamster_name = "heinz";
@@ -117,6 +109,7 @@ public class TestLookup {
 	@Test
 	public void lookup_not_found() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
+		connect();
 		
 		String owner_name = "not";
 		String hamster_name = "found";
@@ -146,6 +139,7 @@ public class TestLookup {
 	@Test
 	public void lookup_empty_owner() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
+		connect();
 		
 		String owner_name = "";
 		String hamster_name = "heinz";
@@ -174,6 +168,7 @@ public class TestLookup {
 	@Test
 	public void lookup_empty_hamster() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
+		connect();
 		
 		String owner_name = "otto";
 		String hamster_name = "";
@@ -202,6 +197,7 @@ public class TestLookup {
 	@Test
 	public void lookup_empty_string() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
+		connect();
 		
 		String owner_name = "";
 		String hamster_name = "";
@@ -230,6 +226,7 @@ public class TestLookup {
 	@Test
 	public void lookup_td3() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td3.dat"));
+		connect();
 		
 		String owner_name = "diesnameee123456789012345678901";
 		String hamster_name = "langerName";
@@ -258,6 +255,7 @@ public class TestLookup {
 	@Test
 	public void lookup_td4() {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td4.dat"));
+		connect();
 		
 		String owner_name = "diesnameee123456789012345678901";
 		String hamster_name = "diesnameee123456789012345678901";

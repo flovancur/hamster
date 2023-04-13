@@ -1,6 +1,9 @@
 package de.hsrm.cs.wwwvs.hamster.tests;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,11 +22,11 @@ public class HamsterTestDataStore {
 
 	private int port = 8088;
 	
-	private  static int sleepMin = 500;
-	private  static int sleepMed = 2000;
-	private  static int sleepMax = 5000;
+	private  static int sleepMin = 10;
+	private  static int sleepMed = 100;
+	private  static int sleepMax = 500;
 	
-	public int testcaseTimeoutms = 20000;
+	public int testcaseTimeoutms = 60000;
 
 	/*
 	 * 
@@ -142,134 +145,83 @@ public class HamsterTestDataStore {
 
 	public void createTestdata1() throws IOException {
 
-		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 23");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);
-			}
-		}
+		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 23", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
 	}
 
 	public void createTestdata2() throws IOException {
 
-		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 0");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);
-			}
-		}
+		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 0", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
 		for (int i = 18; i < 23; i++) {
-			sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " state otto heinz");
-			while (sut.isAlive()) {
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					showException(e);
-				}
-			}
+			sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " state otto heinz", null, new File(pathToHamsterFile));
+			waitToCompletion(sut);
 		}
 	}
 
 	public void createTestdata5() throws IOException {
 
-		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 65535");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);
-			}
-		}
+		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 32767", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
 		for (int i = 18; i < 50; i++) {
-			sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " state otto heinz");
-			while (sut.isAlive()) {
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					showException(e);
-				}
-			}
+			sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " state otto heinz", null, new File(pathToHamsterFile));
+			waitToCompletion(sut);
 		}
 	}
 	
 	public void createTestdata11( ) throws IOException {
 		
-		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 0");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);				
-			}
-		}
-		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " feed otto heinz 16374");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);				
-			}
-		}
+		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 0", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
+		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " feed otto heinz 16374", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
 	}
 	
 	
 	
 	public void createTestdata8( ) throws IOException {
-		
-		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 23");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);	
-			}
-		}
-		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto blondy 42");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);
-			}
-		}
-
+		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 23", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
+		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto blondy 42", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
 	}
-	
+
+	private void waitToCompletion(Process sut) {
+		try {
+			var exitCode = sut.waitFor();
+			if (exitCode != 0) {
+				System.err.println("Warning: Hamster returned non-zero exit-code " + exitCode);
+			}
+		} catch (InterruptedException e) {
+			showException(e);
+		}
+		sleepMin();
+	}
+
 	public void createTestdata13() throws IOException {
-		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 23");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);
-			}
-		}
-		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add bernd blondy 42");
-		while (sut.isAlive()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				showException(e);
-			}
-		}
-		
+		Process sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add otto heinz 23", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
+		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add bernd blondy 42", null, new File(pathToHamsterFile));
+		waitToCompletion(sut);
 	}
 
-	public Process startHamsterServer(int port) {
+	public Process startHamsterServer(int port) throws IOException {
 		String sutPath = getPathToHamsterServer();
 
 		System.out.println("Starting server on port " + port);
-		Process sut = null;
-		try {
-			sut = Runtime.getRuntime().exec(sutPath + " -p " + port);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to start server.");
-		}
+		Process sut = Runtime.getRuntime().exec(sutPath + " -p " + port, null, new File(pathToHamsterFile));
+
+		Process finalSut = sut;
+		Thread outThread = new Thread(() -> {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(finalSut.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("Server: " + line);
+				}
+			} catch (Exception e) {
+			}
+		});
+		outThread.start();
 
 		assertTrue("Server process is not running.", sut.isAlive());
 

@@ -38,11 +38,11 @@ public class TestConnection {
 	@After
 	public void tearDown() throws Exception {
 		sut.destroy();
-		HamsterTestDataStore.getInstance().sleepMid();
+		HamsterTestDataStore.getInstance().sleepMin();
 	}
 
 	@Test
-	public void testDefaultConnection() {
+	public void testDefaultConnection() throws Exception {
 
 		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
 
@@ -76,7 +76,7 @@ public class TestConnection {
 	}
 
 	@Test
-	public void testOnlyLocalhost() {
+	public void testOnlyLocalhost() throws Exception {
 
 		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
 

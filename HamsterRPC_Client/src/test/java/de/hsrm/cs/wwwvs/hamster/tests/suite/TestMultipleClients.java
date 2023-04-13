@@ -29,32 +29,12 @@ public class TestMultipleClients {
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
 
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() {
-		sut.destroy();
-
-		try {
-			Thread.sleep(300);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		HamsterTestDataStore.sleepMin();
-		assertFalse("Server process is not shuting down.", sut.isAlive());
-	}
-
 	@Before
 	public void setUp() {
 
-		assertTrue("Server process is not running.", sut.isAlive());
-
 		try {
+			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
+			assertTrue("Server process is not running.", sut.isAlive());
 			hmstr = new HamsterRPCConnection(hostname, port, true);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -80,6 +60,9 @@ public class TestMultipleClients {
 			fail("Connection failed");
 		}
 		HamsterTestDataStore.sleepMin();
+		sut.destroy();
+		HamsterTestDataStore.sleepMin();
+		assertFalse("Server process is not shuting down.", sut.isAlive());
 	}
 
 	@Test

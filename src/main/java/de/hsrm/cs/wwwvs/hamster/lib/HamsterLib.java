@@ -135,7 +135,7 @@ public class HamsterLib {
 	 *        with -1 before making the first call.
 	 * 
 	 * @param iterator iterator that will be used to get the next entry
-	 * @param owneName name of hamster's owner or null if not specified
+	 * @param ownerName name of hamster's owner or null if not specified
 	 * @param hamsterName name of hamster or null if not specified
 	 * @return If successful: Unique ID (always >= 0) of the next matching entry
 	 * @return On error: Error code (always < 0)

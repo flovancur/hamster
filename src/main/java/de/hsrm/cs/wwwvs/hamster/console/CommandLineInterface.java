@@ -1,13 +1,15 @@
 package de.hsrm.cs.wwwvs.hamster.console;
+
 import de.hsrm.cs.wwwvs.hamster.lib.*;
+
 /**
  * Simple command-line interface for the hamsterlib
+ * 
  * @author hinkel
  */
-public class CommandLineInterface{
+public class CommandLineInterface {
 
-	private static void printRtfm()
-	{
+	private static void printRtfm() {
 		System.out.println("Usage: hamster {<Option>} <param1> {<param2>}");
 		System.out.println("Function: Hamster management");
 		System.out.println("Verbs:");
@@ -19,124 +21,123 @@ public class CommandLineInterface{
 	}
 
 	/**
-	 * The main command-line interface, 
-	 * TODO add your code here
+	 * The main command-line interface,
+	 * 
 	 * @param args
 	 * 
 	 */
-	
-	public static void main(String[] args) {
 
-		String owner = args.length>=2?args[1]:null;
-		String hamster = args.length>=3?args[2]:null;
+	public static void main(String[] args) {
+		String owner = args.length>2?args[1]:null;
+		String hamster = args.length >= 3 ? args[2] : null;
 		HamsterLib store = new HamsterLib();
 		var ownerOut = store.new OutString();
 		var hamsterOut = store.new OutString();
 		var priceOut = store.new OutShort();
 		int id = 0;
-		
-		
-		
-		if(args.length != 0){
+
+		if (args.length != 0) {
 			String command = args[0];
 			HamsterIterator iterator = store.iterator();
-			
-			try{
-				short treats = args.length>=4?Short.parseShort(args[3]):0;
+
+			try {
+				short treats = args.length >= 4 ? Short.parseShort(args[3]) : 0;
 				switch (command) {
 					case "list":
-						try{
-							if(args.length>2){
+						try {
+							if (args.length > 2) {
 								printRtfm();
 								System.exit(2);
 							}
+							int counter = 0;
 							boolean header = true;
-							while(iterator.hasNext()){
-								id=store.directory(iterator, owner, hamster);
+							while (iterator.hasNext()) {
+								counter++;
+								id = store.directory(iterator, owner, hamster);
 								short treatsOut = store.readentry(id, ownerOut, hamsterOut, priceOut);
-								if(header==true){
+								if (header == true) {
 									System.out.println("Owner Name    Price   treats left");
-									header= false;
+									header = false;
 								}
-								System.out.println(ownerOut.getValue() + "\t" + hamsterOut.getValue() + "\t" + priceOut.getValue()+  " €\t"+ treatsOut);
-							}								
-						}
-						catch(HamsterNotFoundException e){
+								System.out.println(ownerOut.getValue() + "\t" + hamsterOut.getValue() + "\t"
+										+ priceOut.getValue() + " €\t" + treatsOut);
+							}
+							if (counter == 0) {
+								System.out.println("No hamsters matching criteria found");
+							}
+						} catch (HamsterNotFoundException e) {
 							System.out.println("No hamsters matching criteria found");
 							System.exit(2);
 						}
 						break;
-	
+
 					case "add":
-					if(args.length>4 || args.length<3){
-						printRtfm();
-						System.exit(2);
-					}
-							int result = store.new_(owner, hamster, treats);
-							
-							System.out.println("Done!");
-					
+						if (args.length > 4 || args.length < 3) {
+							printRtfm();
+							System.exit(2);
+						}
+						store.new_(owner, hamster, treats);
+
+						System.out.println("Done!");
+
 						break;
-	
+
 					case "feed":
-					if(args.length>4 || args.length<4){
-						printRtfm();
-						System.exit(2);
-					}
-							id = store.lookup(owner, hamster);
-							short treatsLeft = store.givetreats(id, treats);
-							System.out.println("Done! " + treatsLeft + " treats remaining in store");
-						
-				
+						if (args.length > 4 || args.length < 4) {
+							printRtfm();
+							System.exit(2);
+						}
+						id = store.lookup(owner, hamster);
+						short treatsLeft = store.givetreats(id, treats);
+						System.out.println("Done! " + treatsLeft + " treats remaining in store");
+
 						break;
-					
+
 					case "state":
-					if(args.length>3 || args.length<3){
-						printRtfm();
-						System.exit(2);
-					}
+						if (args.length > 3 || args.length < 3) {
+							printRtfm();
+							System.exit(2);
+						}
 						HamsterState hState = new HamsterState();
 						id = store.lookup(owner, hamster);
 						store.howsdoing(id, hState);
-						if(hState.getRounds()>0){
-							System.out.println(owner +"'s hamster " + hamster + " has done > 0" + " hamster wheel revolutions,");
-							System.out.println("and has " + hState.getTreatsLeft() + " treats left in store. Current price is " + hState.getCost() + " €");
+						if (hState.getRounds() > 0) {
+							System.out.println(
+									owner + "'s hamster " + hamster + " has done > 0" + " hamster wheel revolutions,");
+							System.out.println("and has " + hState.getTreatsLeft()
+									+ " treats left in store. Current price is " + hState.getCost() + " €");
 						}
-					
+
 						break;
-					
+
 					case "bill":
-					if(args.length>2 || args.length<2){
-						printRtfm();
-						System.exit(2);
-					}
-							short price = store.collect(owner);
-							System.out.println(owner + " has to pay " + price + " €");
-					
+						if (args.length > 2 || args.length < 2) {
+							printRtfm();
+							System.exit(2);
+						}
+						short price = store.collect(owner);
+						System.out.println(owner + " has to pay " + price + " €");
+
 						break;
 					default:
 						printRtfm();
 						System.exit(2);
 				}
-			}
-			catch(HamsterNameTooLongException | HamsterDatabaseCorruptException | HamsterStorageException e){
+			} catch (HamsterNameTooLongException | HamsterDatabaseCorruptException | HamsterStorageException e) {
 				System.out.println("Error: " + e.getMessage());
-			}
-			catch(HamsterNotFoundException e){
+			} catch (HamsterNotFoundException e) {
 				System.out.println("Error: A hamster or hamster owner could not be found");
-			}
-			catch(HamsterAlreadyExistsException e){
+			} catch (HamsterAlreadyExistsException e) {
 				System.out.println("Error: " + e.getMessage());
-			}
-			catch (HamsterEndOfDirectoryException e){
-				
-			}
-			catch (NumberFormatException e){
+			} catch (HamsterEndOfDirectoryException e) {
+
+			} catch (NumberFormatException e) {
 				printRtfm();
 				System.exit(2);
 			}
-	
-		}else{printRtfm();
+
+		} else {
+			printRtfm();
 			System.exit(2);
 		}
 	}

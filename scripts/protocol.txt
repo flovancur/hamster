@@ -1,1 +1,0 @@
-Fehler in Test 3.2.3 list keine Hamster, trotzdem Anzeige

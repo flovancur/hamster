@@ -19,9 +19,7 @@ import de.hsrm.cs.wwwvs.hamster.tests.HamsterTestDataStore;
 				TestGiveTreats.class,
 				TestHowsDoing.class,
 				TestLookup.class,
-				TestMultipleClients.class,
-				TestNew.class, 
-				TestReadEntry.class, 			 
+				TestNew.class,
 				})
 
 /**

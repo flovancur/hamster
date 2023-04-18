@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
+import de.hsrm.cs.wwwvs.hamster.tests.client.HamsterClient;
+import de.hsrm.cs.wwwvs.hamster.tests.client.HamsterClientException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,19 +16,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import de.hsrm.cs.wwwvs.hamster.rpc.HamsterRPCException;
-import de.hsrm.cs.wwwvs.hamster.rpc.HamsterRPCException_DatabaseCorrupt;
-import de.hsrm.cs.wwwvs.hamster.rpc.HamsterRPCException_NameTooLong;
-import de.hsrm.cs.wwwvs.hamster.rpc.HamsterRPCException_NotFound;
-import de.hsrm.cs.wwwvs.hamster.rpc.HamsterRPCException_StorageError;
-import de.hsrm.cs.wwwvs.hamster.rpc.client.HamsterRPCConnection;
 import de.hsrm.cs.wwwvs.hamster.tests.HamsterTestDataStore;
 
 public class TestLookup {
 
 	private Process sut = null;
 	static HamsterTestDataStore store = HamsterTestDataStore.getInstance();	
-	static HamsterRPCConnection hmstr = null;
+	static HamsterClient hmstr = null;
 	
 	static int port = store.getPort();
 	static String hostname = "localhost";
@@ -44,7 +40,7 @@ public class TestLookup {
 		try {
 			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
 			assertTrue("Server process is not running.", sut.isAlive());
-			hmstr = new HamsterRPCConnection(hostname, port, true);
+			hmstr = new HamsterClient(port);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			fail("Failed to connect to server: " + e.getMessage());
@@ -58,14 +54,6 @@ public class TestLookup {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			if (hmstr != null) {
-				hmstr.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Connection failed");
-		} 
 		if (sut != null) {
 			sut.destroy();
 			sut.waitFor();
@@ -74,40 +62,18 @@ public class TestLookup {
 	}
 
 	@Test
-	public void lookup_td1() {
+	public void lookup_td1() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
 		connect();
 		
 		String owner_name = "otto";
 		String hamster_name = "heinz";
-		
-		
-		try {
-			hmstr.lookup(owner_name, hamster_name);
 
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		}
+		hmstr.search(owner_name, hamster_name);
 	}
 	
 	@Test
-	public void lookup_not_found() {
+	public void lookup_not_found() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
 		connect();
 		
@@ -115,169 +81,65 @@ public class TestLookup {
 		String hamster_name = "found";
 		
 		try {
-			hmstr.lookup(owner_name, hamster_name);
+			hmstr.search(owner_name, hamster_name);
 			fail("Expected NotFound error");
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
+		} catch (HamsterClientException e) {
+			assertTrue("error message should contain 'No hamsters matching criteria found' but was " + e.getMessage(), e.getMessage().contains("No hamsters matching criteria found"));
 		}
 	}
 	
 	@Test
-	public void lookup_empty_owner() {
+	public void lookup_empty_owner() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
 		connect();
 		
 		String owner_name = "";
 		String hamster_name = "heinz";
-		
-		try {
-			hmstr.lookup(owner_name, hamster_name);
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		}
+
+	    assertTrue(hmstr.search(owner_name, hamster_name).size() == 2);
 	}
 	
 	@Test
-	public void lookup_empty_hamster() {
+	public void lookup_empty_hamster() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
 		connect();
 		
 		String owner_name = "otto";
 		String hamster_name = "";
-		
-		try {
-			hmstr.lookup(owner_name, hamster_name);
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		}
+
+		assertTrue(hmstr.search(owner_name, hamster_name).size() == 2);
 	}
 	
 	@Test
-	public void lookup_empty_string() {
+	public void lookup_empty_string() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td1.dat"));
 		connect();
 		
 		String owner_name = "";
 		String hamster_name = "";
 		
-		try {
-			hmstr.lookup(owner_name, hamster_name);
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		}
+		assertTrue(hmstr.search(owner_name, hamster_name).size() == 2);
 	}
 	
 	@Test
-	public void lookup_td3() {
+	public void lookup_td3() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td3.dat"));
 		connect();
 		
 		String owner_name = "diesnameee123456789012345678901";
 		String hamster_name = "langerName";
 		
-		try {
-			hmstr.lookup(owner_name, hamster_name);
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		}
+		assertTrue(hmstr.search(owner_name, hamster_name).size() == 2);
 	}
 	
 	@Test
-	public void lookup_td4() {
+	public void lookup_td4() throws Exception {
 		assertTrue("Failed to setup test.", HamsterTestDataStore.getInstance().copyTestHamsterfile("td4.dat"));
 		connect();
 		
 		String owner_name = "diesnameee123456789012345678901";
-		String hamster_name = "diesnameee123456789012345678901";
-		
-		try {
-			hmstr.lookup(owner_name, hamster_name);
-		} catch (HamsterRPCException_NameTooLong e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_NotFound e) {
-		} catch (HamsterRPCException_StorageError e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (HamsterRPCException_DatabaseCorrupt e) {
-			e.printStackTrace();
-			fail("Unexpected Exception: " + e.getClass().getSimpleName());
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		} catch (HamsterRPCException e) {
-			e.printStackTrace();
-			fail("Failed to register new hamster: " + e.getMessage());
-		}
+		String hamster_name = "diesnameee123456789012345678902";
+
+		assertTrue(hmstr.search(owner_name, hamster_name).size() == 2);
 	}
 }

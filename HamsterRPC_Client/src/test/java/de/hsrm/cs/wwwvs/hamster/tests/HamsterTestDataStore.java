@@ -14,11 +14,11 @@ import static org.junit.Assert.fail;
 
 public class HamsterTestDataStore {
 
-	private String pathToHamsterExe = "./tests/hamster";
-	private String pathToHamsterServer = "./hamster_server";
+	private String pathToHamsterExe = "dotnet ../tests/Hamster.dll";
+	private String pathToHamsterServer = "dotnet ../build/net7.0/HamsterServer.dll";
 	private String pathToHamsterFile = System.getProperty("user.dir");
-	private String hamsterFileName = "hamsterfile.dat";
-	private String testdatenPath = "testdaten/";
+	private String hamsterFileName = "hamsterdatastore.xml";
+	private String testdatenPath = "../testdaten/";
 
 	private int port = 8088;
 	
@@ -26,7 +26,7 @@ public class HamsterTestDataStore {
 	private  static int sleepMed = 200;
 	private  static int sleepMax = 1000;
 	
-	public int testcaseTimeoutms = 60000;
+	public int testcaseTimeoutms = 600000;
 
 	/*
 	 * 

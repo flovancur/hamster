@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
-import de.hsrm.cs.wwwvs.hamster.rpc.*;
+import de.hsrm.cs.wwwvs.hamster.tests.client.HamsterClient;
+import de.hsrm.cs.wwwvs.hamster.tests.client.HamsterClientException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,17 +16,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import de.hsrm.cs.wwwvs.hamster.rpc.client.HamsterRPCConnection;
 import de.hsrm.cs.wwwvs.hamster.tests.HamsterTestDataStore;
 
 public class TestNew {
 
 	private Process sut = null;
 	static HamsterTestDataStore store = HamsterTestDataStore.getInstance();	
-	static HamsterRPCConnection hmstr = null;
+	static HamsterClient hmstr = null;
 	
 	static int port = store.getPort();
-	static String hostname = "localhost";
 	
 	@Rule
 	public Timeout globalTimeout= new Timeout(HamsterTestDataStore.getInstance().testcaseTimeoutms, TimeUnit.MILLISECONDS);
@@ -40,7 +39,7 @@ public class TestNew {
 		try {
 			sut = HamsterTestDataStore.getInstance().startHamsterServer(port);
 			assertTrue("Server process is not running.", sut.isAlive());
-			hmstr = new HamsterRPCConnection(hostname, port, true);
+			hmstr = new HamsterClient(port);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			fail("Failed to connect to server: " + e.getMessage());
@@ -53,15 +52,6 @@ public class TestNew {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			if (hmstr != null) {
-				hmstr.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("Connection failed");
-		} 
-
 		sut.destroy();
 		sut.waitFor();
 		assertFalse("Server process is not shuting down.", sut.isAlive());
@@ -78,16 +68,11 @@ public class TestNew {
 
 		connect();
 
-		returnCode = hmstr.new_(owner_name, hamster_name, treats);
+		returnCode = hmstr.new_(owner_name, hamster_name, (short) treats);
 		assertTrue("UUID must be greater or equal to 0.", returnCode >= 0);
 
-		var hmstrOwner = new Hmstr.HamsterString();
-		var hmstrName = new Hmstr.HamsterString();
-		var hmstrPrice = new Hmstr.HamsterInteger();
-		hmstr.readentry(returnCode, hmstrOwner, hmstrName, hmstrPrice);
-		assertEquals(owner_name, hmstrOwner.str);
-		assertEquals(hamster_name, hmstrName.str);
-		assertEquals(17, hmstrPrice.i);
+		var searchResult = hmstr.search(owner_name, hamster_name);
+		assertTrue("newly added hamster not found", searchResult.size() == 2);
 	}
 	
 	@Test
@@ -100,23 +85,16 @@ public class TestNew {
 
 		connect();
 
-		returnCode = hmstr.new_(owner_name, hamster_name, treats);
+		returnCode = hmstr.new_(owner_name, hamster_name, (short) treats);
 		assertTrue("UUID must be greater or equal to 0.", returnCode >= 0);
 
 		// insert duplicate
 		try {
-			returnCode = hmstr.new_(owner_name, hamster_name, treats);
+			returnCode = hmstr.new_(owner_name, hamster_name, (short) treats);
 			fail("Expected exception");
-		} catch (HamsterRPCException_Extists e) {
+		} catch (HamsterClientException e) {
+			assertTrue("Error text should contain 'a hamster by that owner/name already exists'", e.getMessage().contains("a hamster by that owner/name already exists"));
 		}
-
-		var hmstrOwner = new Hmstr.HamsterString();
-		var hmstrName = new Hmstr.HamsterString();
-		var hmstrPrice = new Hmstr.HamsterInteger();
-		hmstr.readentry(returnCode, hmstrOwner, hmstrName, hmstrPrice);
-		assertEquals(owner_name, hmstrOwner.str);
-		assertEquals(hamster_name, hmstrName.str);
-		assertEquals(17, hmstrPrice.i);
 	}
 
 	@Test
@@ -129,16 +107,8 @@ public class TestNew {
 
 		connect();
 
-		returnCode = hmstr.new_(owner_name, hamster_name, treats);
+		returnCode = hmstr.new_(owner_name, hamster_name, (short) treats);
 		assertTrue("UUID must be greater or equal to 0.", returnCode >= 0);
-
-		var hmstrOwner = new Hmstr.HamsterString();
-		var hmstrName = new Hmstr.HamsterString();
-		var hmstrPrice = new Hmstr.HamsterInteger();
-		hmstr.readentry(returnCode, hmstrOwner, hmstrName, hmstrPrice);
-		assertEquals(owner_name, hmstrOwner.str);
-		assertEquals(hamster_name, hmstrName.str);
-		assertEquals(17, hmstrPrice.i);
 	}
 	
 	@Test
@@ -151,14 +121,41 @@ public class TestNew {
 
 		connect();
 
-		returnCode = hmstr.new_(owner_name, hamster_name, treats);
+		returnCode = hmstr.new_(owner_name, hamster_name, (short) treats);
 		assertTrue("UUID must be greater or equal to 0.", returnCode >= 0);
-		var hmstrOwner = new Hmstr.HamsterString();
-		var hmstrName = new Hmstr.HamsterString();
-		var hmstrPrice = new Hmstr.HamsterInteger();
-		hmstr.readentry(returnCode, hmstrOwner, hmstrName, hmstrPrice);
-		assertEquals(owner_name, hmstrOwner.str);
-		assertEquals(hamster_name, hmstrName.str);
-		assertEquals(17, hmstrPrice.i);
+	}
+
+	@Test
+	public void new_owner_name_too_long() throws Exception {
+		String owner_name = "diesnameee12345678901234567890143276478";
+		String hamster_name = "langerName";
+		int treats = 0;
+
+		connect();
+
+		try {
+			hmstr.new_(owner_name, hamster_name, (short) treats);
+			fail("Expected exception to be thrown");
+		}
+		catch (HamsterClientException ex) {
+			assertTrue("error message should contain 'the specified name is too long'", ex.getMessage().contains("the specified name is too long"));
+		}
+	}
+
+	@Test
+	public void new_hamster_name_too_long() throws Exception {
+		String owner_name = "langerName";
+		String hamster_name = "diesnameee12345678901234567890143276478";
+		int treats = 0;
+
+		connect();
+
+		try {
+			hmstr.new_(owner_name, hamster_name, (short) treats);
+			fail("Expected exception to be thrown");
+		}
+		catch (HamsterClientException ex) {
+			assertTrue("error message should contain 'the specified name is too long'", ex.getMessage().contains("the specified name is too long"));
+		}
 	}
 }

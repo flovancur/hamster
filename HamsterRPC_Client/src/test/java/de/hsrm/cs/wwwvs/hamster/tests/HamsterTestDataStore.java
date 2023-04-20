@@ -14,8 +14,8 @@ import static org.junit.Assert.fail;
 
 public class HamsterTestDataStore {
 
-	private String pathToHamsterExe = "dotnet ../tests/Hamster.dll";
-	private String pathToHamsterServer = "dotnet ../build/net7.0/HamsterServer.dll";
+	private String pathToHamsterExe = "java -jar hamster.jar";
+	private String pathToHamsterServer = "java -jar ../build/libs/hamster_server.jar";
 	private String pathToHamsterFile = System.getProperty("user.dir");
 	private String hamsterFileName = "hamsterdatastore.xml";
 	private String testdatenPath = "../testdaten/";

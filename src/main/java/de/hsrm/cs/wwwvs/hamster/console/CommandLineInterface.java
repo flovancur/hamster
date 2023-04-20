@@ -37,6 +37,7 @@ public class CommandLineInterface {
 		do {
 			var treats = lib.readentry(hamster, ownerName, name, price);
 			System.out.println(String.format("%s\t%s\t%d €\t%d", ownerName.getValue(), name.getValue(), price.getValue(), treats));
+			hamster = lib.directory(it, owner, null);
 		} while (true);
 	}
 

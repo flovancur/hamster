@@ -23,7 +23,6 @@ public class HamsterServerCommandLine {
 
 	/**
 	 * The main command-line interface,
-	 * TODO add your code here
 	 * 
 	 * @param args
 	 */
@@ -48,11 +47,12 @@ public class HamsterServerCommandLine {
 			}
 		}
 		try {
-			System.exit(printRtfm());
+			var server = new HamsterServer();
+			server.start(hostName, port);
+			server.blockUntilShutdown();
 		}
 		catch (Exception ex) {
-			System.err.println("Server exception: " + ex.getMessage());
-			ex.printStackTrace();
+			System.out.println("Server exception: " + ex.getMessage());
 		}
 	}
 

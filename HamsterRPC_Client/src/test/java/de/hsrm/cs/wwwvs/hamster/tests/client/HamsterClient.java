@@ -8,7 +8,7 @@ import java.util.List;
 
 public class HamsterClient {
     private int port;
-    private static String pathToHamsterClient = "dotnet ../build/net7.0/HamsterClient.dll";
+    private static String pathToHamsterClient = "java -jar ../build/libs/hamster_client.jar";
 
     public static String getPathToHamsterClient() { return pathToHamsterClient; }
 

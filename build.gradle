@@ -1,16 +1,61 @@
 plugins {
 	id 'java'
+    id 'com.google.protobuf' version '0.9.1'
 }
+
+
+def grpcVersion = '1.54.1'
+def protobufVersion = '3.22.3'
+def protocVersion = protobufVersion
 
 group = 'de.hsrm.cs.wwwvs'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
-jar {
+task hamster(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.console.CommandLineInterface'
+    }
+    archiveName "hamster.jar"
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.output) {
+        include "de/hsrm/cs/wwwvs/hamster/lib/**"
+        include "de/hsrm/cs/wwwvs/hamster/console/**"
+    }
+
+}
+
+task hamster_server(type: Jar) {
     manifest {
         attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.server.HamsterServerCommandLine'
     }
     archiveName "hamster_server.jar"
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from(sourceSets.main.output) {
+        include "de/hsrm/cs/wwwvs/hamster/server/**"
+        include "de/hsrm/cs/wwwvs/hamster/lib/**"
+        include "de/hsrm/cs/wwwvs/hamster/rpc/**"
+    }
+
+}
+
+task hamster_client(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.client.ClientCommandLine'
+    }
+    archiveName "hamster_client.jar"
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from(sourceSets.main.output) {
+        include "de/hsrm/cs/wwwvs/hamster/client/**"
+        include "de/hsrm/cs/wwwvs/hamster/rpc/**"
+    }
+
 }
 
 repositories {
@@ -18,8 +63,33 @@ repositories {
 }
 
 dependencies {
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-services:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    implementation "io.grpc:grpc-netty:${grpcVersion}"
+
+    compileOnly "org.apache.tomcat:annotations-api:6.0.53"
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
 }

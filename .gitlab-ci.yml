@@ -15,7 +15,8 @@ build:
   script: 
     - 'chmod u+x gradle-build.sh'
     - 'chmod u+x gradlew'
-    - './gradle-build.sh "$HTTP_PROXY" jar'
+    - './gradle-build.sh "$HTTP_PROXY" hamster_server'
+    - './gradle-build.sh "$HTTP_PROXY" hamster_client'
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
@@ -30,7 +31,8 @@ test-code-job1:
   script:
     - 'chmod u+x gradle-build.sh'
     - 'chmod u+x gradlew'
-    - './gradle-build.sh "$HTTP_PROXY" jar'
+    - './gradle-build.sh "$HTTP_PROXY" hamster_server'
+    - './gradle-build.sh "$HTTP_PROXY" hamster_client'
     - 'cd tests'
     - 'java -jar TestRunnerHamster.jar -P "java -jar ../build/libs/hamster_server.jar" -H "java -jar hamster.jar" -F hamsterdatastore.xml -C "java -jar ../build/libs/hamster_client.jar" > testresult.txt'
   artifacts:

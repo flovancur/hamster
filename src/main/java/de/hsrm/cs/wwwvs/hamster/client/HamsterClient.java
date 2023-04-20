@@ -1,15 +1,23 @@
 package de.hsrm.cs.wwwvs.hamster.client;
 
 import de.hsrm.cs.wwwvs.hamster.rpc.*;
-import io.grpc.Grpc;
-import io.grpc.InsecureChannelCredentials;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
+import io.grpc.*;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.net.SocketAddress;
 
 public class HamsterClient {
 
     public HamsterClient(String hostName, int port) {
         var channel = ManagedChannelBuilder.forAddress(hostName, port)
+                .proxyDetector(new ProxyDetector() {
+                    @Nullable
+                    @Override
+                    public ProxiedSocketAddress proxyFor(SocketAddress targetServerAddress) throws IOException {
+                        return null;
+                    }
+                })
                 .usePlaintext()
                 .build();
         // TODO

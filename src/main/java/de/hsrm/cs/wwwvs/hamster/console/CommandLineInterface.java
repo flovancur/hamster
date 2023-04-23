@@ -24,11 +24,11 @@ public class CommandLineInterface {
 	 * The main command-line interface,
 	 * 
 	 * @param args
-	 * 
 	 */
 
 	public static void main(String[] args) {
-		String owner = args.length>2?args[1]:null;
+
+		String owner = args.length >= 2 ? args[1] : null;
 		String hamster = args.length >= 3 ? args[2] : null;
 		HamsterLib store = new HamsterLib();
 		var ownerOut = store.new OutString();
@@ -55,7 +55,7 @@ public class CommandLineInterface {
 								counter++;
 								id = store.directory(iterator, owner, hamster);
 								short treatsOut = store.readentry(id, ownerOut, hamsterOut, priceOut);
-								if (header == true) {
+								if (header) {
 									System.out.println("Owner Name    Price   treats left");
 									header = false;
 								}
@@ -76,14 +76,14 @@ public class CommandLineInterface {
 							printRtfm();
 							System.exit(2);
 						}
-						store.new_(owner, hamster, treats);
+						int result = store.new_(owner, hamster, treats);
 
 						System.out.println("Done!");
 
 						break;
 
 					case "feed":
-						if (args.length > 4 || args.length < 4) {
+						if (args.length != 4) {
 							printRtfm();
 							System.exit(2);
 						}
@@ -94,7 +94,7 @@ public class CommandLineInterface {
 						break;
 
 					case "state":
-						if (args.length > 3 || args.length < 3) {
+						if (args.length != 3) {
 							printRtfm();
 							System.exit(2);
 						}
@@ -111,7 +111,7 @@ public class CommandLineInterface {
 						break;
 
 					case "bill":
-						if (args.length > 2 || args.length < 2) {
+						if (args.length != 2) {
 							printRtfm();
 							System.exit(2);
 						}
@@ -123,13 +123,12 @@ public class CommandLineInterface {
 						printRtfm();
 						System.exit(2);
 				}
-			} catch (HamsterNameTooLongException | HamsterDatabaseCorruptException | HamsterStorageException e) {
+			} catch (HamsterNameTooLongException | HamsterDatabaseCorruptException | HamsterStorageException |
+					 HamsterAlreadyExistsException e) {
 				System.out.println("Error: " + e.getMessage());
 			} catch (HamsterNotFoundException e) {
 				System.out.println("Error: A hamster or hamster owner could not be found");
-			} catch (HamsterAlreadyExistsException e) {
-				System.out.println("Error: " + e.getMessage());
-			} catch (HamsterEndOfDirectoryException e) {
+			} catch (HamsterEndOfDirectoryException ignored) {
 
 			} catch (NumberFormatException e) {
 				printRtfm();

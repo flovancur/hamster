@@ -35,7 +35,9 @@ test-code-job1:
     - './gradle-build.sh "$HTTP_PROXY" hamster_client'
     - 'cd tests'
     - 'java -jar TestRunnerHamster.jar -P "java -jar ../build/libs/hamster_server.jar" -H "java -jar hamster.jar" -F hamsterdatastore.xml -C "java -jar ../build/libs/hamster_client.jar" > testresult.txt'
+    - 'java -jar ResilienceRunnerHamster.jar -P "java -jar ../build/libs/hamster_server.jar" -H "java -jar hamster.jar" -F hamsterdatastore.xml -C "java -jar ../build/libs/hamster_client.jar" > resilienceresult.txt'
   artifacts:
     when: always
     paths:
       - 'tests/testresult.txt'
+      - 'tests/resilienceresult.txt'

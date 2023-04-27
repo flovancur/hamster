@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.function.Consumer;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,6 +28,8 @@ public class HamsterTestDataStore {
 	private  static int sleepMax = 1000;
 	
 	public int testcaseTimeoutms = 600000;
+
+	private static Consumer<String> logProcessor;
 
 	/*
 	 * 
@@ -204,9 +207,15 @@ public class HamsterTestDataStore {
 		sut = Runtime.getRuntime().exec(this.pathToHamsterExe + " add bernd blondy 42", null, new File(pathToHamsterFile));
 		waitToCompletion(sut);
 	}
-
 	public Process startHamsterServer(int port) throws IOException {
+		return startHamsterServer(port, 0.0);
+	}
+
+	public Process startHamsterServer(int port, double feedFailProbability) throws IOException {
 		String sutPath = getPathToHamsterServer();
+		if (feedFailProbability > 0) {
+			sutPath += " -f " + feedFailProbability;
+		}
 
 		System.out.println("Starting server on port " + port);
 		Process sut = Runtime.getRuntime().exec(sutPath + " -p " + port, null, new File(pathToHamsterFile));
@@ -217,6 +226,9 @@ public class HamsterTestDataStore {
 				String line;
 				while ((line = reader.readLine()) != null) {
 					System.out.println("Server: " + line);
+					if (logProcessor != null) {
+						logProcessor.accept(line);
+					}
 				}
 			} catch (Exception e) {
 			}
@@ -227,6 +239,14 @@ public class HamsterTestDataStore {
 
 		HamsterTestDataStore.sleepMax();
 		return sut;
+	}
+
+	public static Consumer<String> getLogProcessor() {
+		return logProcessor;
+	}
+
+	public static void setLogProcessor(Consumer<String> processor) {
+		logProcessor = processor;
 	}
 	
 	public String getPathToHamsterServer( ) {

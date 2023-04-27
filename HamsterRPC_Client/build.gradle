@@ -19,6 +19,19 @@ task test_runner_jar(type: Jar) {
     }
 }
 
+task resilience_runner_jar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.tests.ResilienceRunner'
+    }
+    archiveName "ResilienceRunnerHamster.jar"
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from(sourceSets.test.output) {
+        include "de/hsrm/cs/wwwvs/hamster/**"
+    }
+}
+
 repositories {
 	mavenCentral()
 }

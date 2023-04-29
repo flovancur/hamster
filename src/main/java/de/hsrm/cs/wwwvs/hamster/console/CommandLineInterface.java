@@ -101,12 +101,10 @@ public class CommandLineInterface {
 						HamsterState hState = new HamsterState();
 						id = store.lookup(owner, hamster);
 						store.howsdoing(id, hState);
-						if (hState.getRounds() > 0) {
-							System.out.println(
-									owner + "'s hamster " + hamster + " has done > 0" + " hamster wheel revolutions,");
-							System.out.println("and has " + hState.getTreatsLeft()
-									+ " treats left in store. Current price is " + hState.getCost() + " €");
-						}
+						System.out.println(owner + "'s hamster " + hamster + " has done " + hState.getRounds()
+								+ " hamster wheel revolutions,");
+						System.out.println("and has " + hState.getTreatsLeft()
+								+ " treats left in store. Current price is " + hState.getCost() + " €");
 
 						break;
 
@@ -123,8 +121,8 @@ public class CommandLineInterface {
 						printRtfm();
 						System.exit(2);
 				}
-			} catch (HamsterNameTooLongException | HamsterDatabaseCorruptException | HamsterStorageException |
-					 HamsterAlreadyExistsException e) {
+			} catch (HamsterNameTooLongException | HamsterDatabaseCorruptException | HamsterStorageException
+					| HamsterAlreadyExistsException e) {
 				System.out.println("Error: " + e.getMessage());
 			} catch (HamsterNotFoundException e) {
 				System.out.println("Error: A hamster or hamster owner could not be found");

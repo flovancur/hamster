@@ -2,8 +2,17 @@ package de.hsrm.cs.wwwvs.hamster.lib;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 public class HamsterLib {
+
+	private static double feedFailureProbability;
+
+	public static void setFeedFailureProbability(double value) {
+		feedFailureProbability = value;
+	}
+
+	private static Random random = new Random(68729);
 	
 	public class OutString {
 		String value;
@@ -243,9 +252,15 @@ public class HamsterLib {
 	 * @return On error: Error code (always < 0)
 	 * @throws HamsterNotFoundException
 	 * @throws HamsterStorageException
+	 * @throws HamsterRefusedTreatException
 	 */
 	public short givetreats(int id, short treats)
-			throws HamsterNotFoundException, HamsterStorageException {
+			throws HamsterNotFoundException, HamsterStorageException, HamsterRefusedTreatException {
+
+		if (random.nextDouble() < feedFailureProbability) {
+			throw new HamsterRefusedTreatException();
+		}
+
 		if (treats < 0) {
 			treats = 0;
 		}

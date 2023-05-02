@@ -1,9 +1,13 @@
 package de.hsrm.cs.wwwvs.hamster.client;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterException;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterLib;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterState;
-import io.grpc.StatusRuntimeException;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LoggerConfiguration;
+
 
 public class ClientCommandLine {
 
@@ -47,6 +51,8 @@ public class ClientCommandLine {
         }
 
         var client = new HamsterClient(host, port);
+        var logger = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        logger.setLevel(Level.OFF);
 
         try {
             switch (args[0]) {
@@ -112,8 +118,8 @@ public class ClientCommandLine {
             }
             printRtfm();
             System.exit(2);
-        } catch (StatusRuntimeException exception) {
-            System.out.println(exception.getStatus().getDescription());
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
             System.exit(1);
         }
     }

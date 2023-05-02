@@ -1,16 +1,13 @@
 plugins {
 	id 'java'
-    id 'com.google.protobuf' version '0.9.1'
+	id 'org.springframework.boot' version '3.0.6'
+	id 'io.spring.dependency-management' version '1.1.0'
 }
-
-
-def grpcVersion = '1.54.1'
-def protobufVersion = '3.22.3'
-def protocVersion = protobufVersion
 
 group = 'de.hsrm.cs.wwwvs'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
+var resilience4jVersion = '2.0.0'
 
 task hamster(type: Jar) {
     manifest {
@@ -25,21 +22,9 @@ task hamster(type: Jar) {
 
 }
 
-task hamster_server(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'de.hsrm.cs.wwwvs.hamster.server.HamsterServerCommandLine'
-    }
-    archiveName "hamster_server.jar"
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    from(sourceSets.main.output) {
-        include "de/hsrm/cs/wwwvs/hamster/server/**"
-        include "de/hsrm/cs/wwwvs/hamster/lib/**"
-        include "de/hsrm/cs/wwwvs/hamster/rpc/**"
-    }
-
+tasks.named("bootJar") {
+    mainClass = 'de.hsrm.cs.wwwvs.hamster.server.HamsterServerCommandLine'
+    archiveName = 'hamster_server.jar'
 }
 
 task hamster_client(type: Jar) {
@@ -55,41 +40,19 @@ task hamster_client(type: Jar) {
         include "de/hsrm/cs/wwwvs/hamster/client/**"
         include "de/hsrm/cs/wwwvs/hamster/rpc/**"
     }
-
 }
 
 repositories {
 	mavenCentral()
+    jcenter()
 }
 
 dependencies {
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation "io.grpc:grpc-services:${grpcVersion}"
-    implementation "io.grpc:grpc-stub:${grpcVersion}"
-    implementation "io.grpc:grpc-netty:${grpcVersion}"
-
-    compileOnly "org.apache.tomcat:annotations-api:6.0.53"
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "io.github.resilience4j:resilience4j-all:${resilience4jVersion}"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
-    plugins {
-        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
-    }
-    generateProtoTasks {
-        all()*.plugins { grpc {} }
-    }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs 'build/generated/source/proto/main/grpc'
-            srcDirs 'build/generated/source/proto/main/java'
-        }
-    }
 }

@@ -15,7 +15,7 @@ import static org.junit.Assert.fail;
 
 public class HamsterTestDataStore {
 
-	private String pathToHamsterExe = "java -jar hamster.jar";
+	private String pathToHamsterExe = "java -jar ../tests/hamster.jar";
 	private String pathToHamsterServer = "java -jar ../build/libs/hamster_server.jar";
 	private String pathToHamsterFile = System.getProperty("user.dir");
 	private String hamsterFileName = "hamsterdatastore.xml";
@@ -25,7 +25,7 @@ public class HamsterTestDataStore {
 	
 	private  static int sleepMin = 100;
 	private  static int sleepMed = 200;
-	private  static int sleepMax = 1000;
+	private  static int sleepMax = 4000;
 	
 	public int testcaseTimeoutms = 600000;
 

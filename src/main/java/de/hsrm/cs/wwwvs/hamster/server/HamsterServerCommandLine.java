@@ -4,6 +4,14 @@ import de.hsrm.cs.wwwvs.hamster.lib.HamsterException;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterLib;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterState;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 /**
  * Simple command-line interface for the hamsterlib
  * 
@@ -24,7 +32,7 @@ public class HamsterServerCommandLine {
 	/**
 	 * The main command-line interface,
 	 * TODO add your code here
-	 * 
+	 *
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -48,9 +56,24 @@ public class HamsterServerCommandLine {
 			}
 		}
 		try {
-			System.exit(printRtfm());
-		}
-		catch (Exception ex) {
+			InetAddress address = Inet4Address.getByName(hostName);
+			ServerSocket serverSocket = new ServerSocket(port,50,address);
+
+			while(true){
+				Socket socket = serverSocket.accept();
+				InputStream input = socket.getInputStream();
+				InputStreamReader reader = new InputStreamReader(input);
+//				BufferedReader bufReader = new BufferedReader(reader);
+				char[] buffer = new char[socket.getReceiveBufferSize()];
+				int character = reader.read(buffer);
+				String output = new String(buffer,0,character);
+//				String output = bufReader.readLine();
+
+				System.out.println(output);
+				System.out.println(output.length());
+			}
+			//System.exit(printRtfm());
+		} catch (Exception ex) {
 			System.err.println("Server exception: " + ex.getMessage());
 			ex.printStackTrace();
 		}

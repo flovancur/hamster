@@ -41,3 +41,17 @@ Machen Sie sich zunächst anhand eines einfachen Beispiels mit der Benutzung
 von gRPC vertraut. Es gibt unzählige gRPC Tutorials im Netz. Mit [1](https://grpc.io/docs/languages/java/basics/) sei
 hier nur eines davon genannt. Erproben Sie das dort gezeigte Beispiel, um die
 Benutzung der Tools kennenzulernen.
+
+## Hinweise Java
+
+In Gradle sind nun zwei Build targets hinterlegt, einmal das Ziel `hamster_server_jar` und
+einmal das Ziel `hamster_client_jar`. Beachten Sie bitte, dass das in den Vorlagen enthaltene
+Skript gradle-build.sh immer nur ein Ziel bauen kann, falls Sie also auf einem Poolrechner
+arbeiten, sollten Sie immer nur ein Target auf einmal bauen oder direkt mit gradlew arbeiten
+und den Proxy direkt spezifizieren (umständlich).
+
+In Gradle sind Plugins hinterlegt, die automatisch aus Ihren Proto-Dateien Code generieren
+und diesen den gängigen Entwicklungsumgebungen zugänglich machen. Das können allerdings
+nicht alle Entwicklungsumgebungen, daher auch hier der Hinweis auf IntelliJ. Es empfiehlt sich
+also, erst die Proto-Datei zu bearbeiten und dann zu kompilieren, damit der Quellcode aus der
+Proto-Datei generiert wird und Ihnen dann zur Verfügung steht.

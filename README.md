@@ -11,12 +11,15 @@ Das gRPC Protokoll ist allgemein verfügbar, es ist für gute Effizienz bekannt
 und es erlaubt durch die Verfügbarkeit von Implementierungen in verschiedenen Programmiersprachen und -plattformen problemlos die Weiterverwendung
 der Hamsterbibliothek. Deshalb entscheidet man sich für diesen Standard.
 
-Unter *src* finden Sie den Quellcode eines einfachen Menüprogramms, das die API der
-Hamsterlib verwendet.
+In Ihrem Git-Repository finden Sie
+die bereits bekannte Hamsterlib. 
+Unter *src* finden Sie auch den Quellcode eines einfachen Menüprogramms, das die API der
+Hamsterlib verwendet. Zudem ist auch eine Vorlage für den Client enthalten, in dem das Parsen der CLI-Schnittstelle
+bereits implementiert ist, die vom Parser aufgerufenen Funktionen aber noch leer sind.
 
 Ihre Aufgabe ist es nun, dieses Programm in ein verteiltes Programm,
-bestehend aus einem *Server* und einem *Client*, umzuwandeln. Dabei sollen
-Server und Client mittels gRPC miteinander kommunizieren.
+bestehend aus einem *Server* und einem *Client*, umzuwandeln. Dabei sollen Server und Client mittels gRPC miteinander kommunizieren.
+Wichtig ist hierbei, dass die Ausgabe des neuen Clients identisch mit der Ausgabe des bestehenden Client-Programms ist.
 
 Dazu sind folgende Schritte erforderlich:
 
@@ -32,6 +35,9 @@ Dazu sind folgende Schritte erforderlich:
 
 Die Testsuite für diese Aufgabe ist dieselbe wie beim letzten Übungsblatt, allerdings wird der Testtreiber nun
 Ihren Client aufrufen, anstatt wie beim letzten mal direkt als Client zu agieren.
+
+**Wichtig:** Um die Tests einfacher zu machen, wurden kleine Anpassungen an der Ausgabe des Clients vorgenommen. So wird erwartet, dass Sie
+bei den Verben *add*, *feed* und *bill* nur das Ergebnis (ID, übrige Leckerli oder zu zahlenden Betrag) als Ganzzahl auf die Konsole ausgeben.
 
 Sie können die Testsuite wie gehabt als ausführbares Jar-Archiv ausführen, auch die Ausgaben sind identisch zum letzten Übungsblatt.
 

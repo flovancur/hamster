@@ -305,7 +305,7 @@ public class HamsterRPCConnection implements Hmstr {
 		int msgId = this.requestCounter++;
 		
 		encodeMsg(buff, protocolFlagRequest, msgId, p, HAMSTER_RPC_FUNCID_DIRECTORY);
-				
+				byte
 		this.sendMsg(buff);
 		
 		ByteBuffer rheader = receiveHeader();

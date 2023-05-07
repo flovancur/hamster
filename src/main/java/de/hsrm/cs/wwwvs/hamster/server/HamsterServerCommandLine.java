@@ -4,12 +4,12 @@ import de.hsrm.cs.wwwvs.hamster.lib.HamsterException;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterLib;
 import de.hsrm.cs.wwwvs.hamster.lib.HamsterState;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 /**
  * Simple command-line interface for the hamsterlib
@@ -32,7 +32,7 @@ public class HamsterServerCommandLine {
 
 	}
 
-	private static byte[] charArrayToByteArray(char[] c_array) {
+	private static byte[] charArrayToByteArray(byte[] c_array) {
 		byte[] b_array = new byte[c_array.length];
 		for(int i= 0; i < c_array.length; i++) {
 			b_array[i] = (byte)(0xFF & (int)c_array[i]);
@@ -40,28 +40,31 @@ public class HamsterServerCommandLine {
 		return b_array;
 	}
 
-	private static String generateOwnerName(char[] bufferOwner){
+	private static String generateOwnerName(byte[] bufferOwner){
 		boolean end = false;
 		int i = 0;
-		while(!end && i<40){
-			if(bufferOwner[i+8]=='\u0000'){
+		while(!end && i<32){
+			if(bufferOwner[i]=='\u0000'){
 				end=true;
+				break;
 			}
 			i++;
 		}
-		return new String(bufferOwner,8,4);
+		return new String(bufferOwner,0,i);
 	}
 
-	private static String generateHamsterName(char[] bufferOwner){
+
+	private static String generateHamsterName(byte[] bufferOwner){
 		boolean end = false;
 		int i = 0;
-		while(!end && i<40){
-			if(bufferOwner[i+40]=='\u0000'){
+		while(!end && i<32){
+			if(bufferOwner[i]=='\u0000'){
 				end=true;
+				break;
 			}
 			i++;
 		}
-		return new String(bufferOwner,40,4);
+		return new String(bufferOwner,0,i);
 	}
 
 
@@ -74,6 +77,7 @@ public class HamsterServerCommandLine {
 	public static void main(String[] args) {
 		String hostName = "127.0.0.1";
 		int port = 9000;
+		HamsterLib hamsterLib = new HamsterLib();
 
 		if (args.length == 0) {
 			System.exit(printRtfm());
@@ -98,17 +102,59 @@ public class HamsterServerCommandLine {
 			while(true){
 				Socket socket = serverSocket.accept();
 				InputStream input = socket.getInputStream();
-				InputStreamReader reader = new InputStreamReader(input);
-				char[] buffer = new char[socket.getReceiveBufferSize()];
-				int size = reader.read(buffer);
-				String output = new String(buffer);
-				byte[] bytes = charArrayToByteArray(buffer);
+				ByteBuffer header = ByteBuffer.allocate(8);
+				input.read(header.array());
+				byte version = header.get();
+				byte flag = header.get();
+				short messageId = header.getShort();
+				short payloadLength = header.getShort();
+				short rpcCall = header.getShort();
+				ByteBuffer payload = ByteBuffer.allocate(payloadLength);
+				input.read(payload.array());
+				byte[] ownerIn = new byte[32];
+				payload.get(ownerIn,0,32);
+				byte[] hamsterIn = new byte[32];
+				payload.get(hamsterIn,0,32);
+				short treats = payload.getShort();
+				OutputStream out = socket.getOutputStream();
+				DataOutputStream outStream = new DataOutputStream(out);
 
-				System.out.println(generateOwnerName(buffer));
-				System.out.println(generateHamsterName(buffer));
+
+				String owner = generateOwnerName(ownerIn);
+				String hamster = generateHamsterName(hamsterIn);
+
+				switch (rpcCall){
+					case 1:
+						try{
+							int id = hamsterLib.new_(owner,hamster,treats);
+							ByteBuffer retPayload = ByteBuffer.allocate(12);
+							retPayload.put(version);
+							retPayload.put((byte)1);
+							retPayload.putShort(messageId);
+							retPayload.putShort((short)4);
+							retPayload.putShort(rpcCall);
+							retPayload.putInt(id);
+							out.write(retPayload.array());
+						}catch (HamsterException e){
+							ByteBuffer retPayload = ByteBuffer.allocate(12);
+							retPayload.put(version);
+							retPayload.put((byte)2);
+							retPayload.putShort(messageId);
+							retPayload.putShort((short)4);
+							retPayload.putShort(rpcCall);
+							retPayload.putInt(2);
+							out.write(retPayload.array());
+						}
+						break;
+					default:
+						System.out.println("Error");
+				}
+
+
+				System.out.println(generateOwnerName(ownerIn));
+				System.out.println(generateHamsterName(hamsterIn));
 
 				socket.close();
-
 
 			}
 			//System.exit(printRtfm());

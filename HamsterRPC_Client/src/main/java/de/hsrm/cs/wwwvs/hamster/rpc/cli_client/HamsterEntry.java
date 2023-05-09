@@ -13,5 +13,5 @@ public class HamsterEntry {
 		this.name = name;
 		this.price = price;
 		this.treats = treats;
-	}
+	}sendMessage
 }

@@ -153,19 +153,19 @@ public class CLIClient {
 
 				ArrayList<HamsterEntry> entries = new ArrayList<>();
 
-				try {
+				try {long
 					int ret = 0;
 					while (ret >= 0) {
 						ret = hamsterserver.directory(handle, null, null);
-						// System.out.println("HamsterID " + ret);
+						 System.out.println("HamsterID " + ret);
 
 						Hmstr.HamsterString dirOwner = new Hmstr.HamsterString();
 						Hmstr.HamsterString dirName = new Hmstr.HamsterString();
 						Hmstr.HamsterInteger dirPrice = new Hmstr.HamsterInteger();
 						treats = hamsterserver.readentry(ret, dirOwner, dirName, dirPrice);
 
-						// System.out.println(dirOwner.str + " " + dirName.str + " " + dirPrice.i + " "
-						// + treats);
+						 System.out.println(dirOwner.str + " " + dirName.str + " " + dirPrice.i + " "
+						 + treats);
 						entries.add(new HamsterEntry(Integer.toString(ret), dirOwner.str, dirName.str,
 								Integer.toString(dirPrice.i), Integer.toString(treats)));
 

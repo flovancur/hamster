@@ -14,7 +14,7 @@ import static org.junit.Assert.fail;
 
 public class HamsterTestDataStore {
 
-	private String pathToHamsterExe = "java -jar hamster.jar";
+	private String pathToHamsterExe = "java -jar ../tests/hamster.jar";
 	private String pathToHamsterServer = "java -jar ../build/libs/hamster_server.jar";
 	private String pathToHamsterFile = System.getProperty("user.dir");
 	private String hamsterFileName = "hamsterdatastore.xml";

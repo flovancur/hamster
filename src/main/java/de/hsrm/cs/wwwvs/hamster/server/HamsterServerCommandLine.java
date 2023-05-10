@@ -93,24 +93,6 @@ public class HamsterServerCommandLine {
 	}
 
 
-
-
-
-//	private static class HamsterReturn {
-//		public String owner;
-//		public String hamster;
-//		public Short price;
-//		public Short treats;
-//
-//		public HamsterReturn(String owner, String hamster, Short price, Short treats){
-//			this.owner = owner;
-//			this.hamster = hamster;
-//			this.price = price;
-//			this.treats = treats;
-//		}
-//	}
-
-
 	/**
 	 * The main command-line interface,
 	 * TODO add your code here
@@ -196,10 +178,16 @@ public class HamsterServerCommandLine {
 						payload.get(hamsterIn, 0, 32);
 						String owner = generateName(ownerIn);
 						String hamster = generateName(hamsterIn);
-						int id = hamsterLib.lookup(owner, hamster);
-						ByteBuffer retPayload = sendHeader(inputHeader, 4, 1);
-						retPayload.putInt(id);
-						out.write(retPayload.array());
+						if(owner==null || hamster==null){
+							ByteBuffer retPayload = sendHeader(inputHeader,4,2);
+							retPayload.putInt(-101);
+							out.write(retPayload.array());
+						}else{
+							int id = hamsterLib.lookup(owner, hamster);
+							ByteBuffer retPayload = sendHeader(inputHeader, 4, 1);
+							retPayload.putInt(id);
+							out.write(retPayload.array());
+						}
 					}catch (HamsterNameTooLongException e){
 						ByteBuffer retPayload = sendHeader(inputHeader,4,2);
 						retPayload.putInt(-1);
@@ -301,10 +289,16 @@ public class HamsterServerCommandLine {
 						byte[] ownerIn = new byte[32];
 						payload.get(ownerIn, 0, 32);
 						String owner = generateName(ownerIn);
-						int price = hamsterLib.collect(owner);
-						ByteBuffer retPayload = sendHeader(inputHeader,4, 1);
-						retPayload.putInt(price);
-						out.write(retPayload.array());
+						if(owner==null){
+							ByteBuffer retPayload = sendHeader(inputHeader,4,2);
+							retPayload.putInt(-101);
+							out.write(retPayload.array());
+						}else {
+							int price = hamsterLib.collect(owner);
+							ByteBuffer retPayload = sendHeader(inputHeader, 4, 1);
+							retPayload.putInt(price);
+							out.write(retPayload.array());
+						}
 						break;
 					}catch (HamsterNotFoundException e){
 						ByteBuffer retPayload = sendHeader(inputHeader,4,2);

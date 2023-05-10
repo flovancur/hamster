@@ -178,16 +178,11 @@ public class HamsterServerCommandLine {
 						payload.get(hamsterIn, 0, 32);
 						String owner = generateName(ownerIn);
 						String hamster = generateName(hamsterIn);
-						if(owner==null || hamster==null){
-							ByteBuffer retPayload = sendHeader(inputHeader,4,2);
-							retPayload.putInt(-101);
-							out.write(retPayload.array());
-						}else{
+
 							int id = hamsterLib.lookup(owner, hamster);
 							ByteBuffer retPayload = sendHeader(inputHeader, 4, 1);
 							retPayload.putInt(id);
 							out.write(retPayload.array());
-						}
 					}catch (HamsterNameTooLongException e){
 						ByteBuffer retPayload = sendHeader(inputHeader,4,2);
 						retPayload.putInt(-1);
@@ -284,23 +279,18 @@ public class HamsterServerCommandLine {
 						retPayload.putInt(-100);
 						out.write(retPayload.array());
 					}
+					break;
 					case 7:
-					try{
+					try {
 						byte[] ownerIn = new byte[32];
 						payload.get(ownerIn, 0, 32);
 						String owner = generateName(ownerIn);
-						if(owner==null){
-							ByteBuffer retPayload = sendHeader(inputHeader,4,2);
-							retPayload.putInt(-101);
-							out.write(retPayload.array());
-						}else {
-							int price = hamsterLib.collect(owner);
-							ByteBuffer retPayload = sendHeader(inputHeader, 4, 1);
-							retPayload.putInt(price);
-							out.write(retPayload.array());
-						}
-						break;
-					}catch (HamsterNotFoundException e){
+						int price = hamsterLib.collect(owner);
+						ByteBuffer retPayload = sendHeader(inputHeader, 4, 1);
+						retPayload.putInt(price);
+						out.write(retPayload.array());
+					}
+					catch (HamsterNotFoundException e){
 						ByteBuffer retPayload = sendHeader(inputHeader,4,2);
 						retPayload.putInt(-3);
 						out.write(retPayload.array());
@@ -313,6 +303,7 @@ public class HamsterServerCommandLine {
 						retPayload.putInt(-1);
 						out.write(retPayload.array());
 					}
+					break;
 				}
 
             /*	System.out.println(generateName(ownerIn));

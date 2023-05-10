@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class RPCMessageHeader {
 	
 	public int payloadSize;
-	public int msgID;
+	public msgID;
 	public boolean isResonse;
 	public boolean isError;
 	public byte version;

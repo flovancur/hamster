@@ -178,7 +178,7 @@ public class HamsterServerCommandLine {
 							String hamster = generateName(hamsterIn);
 							if(owner==null|hamster==null){
 								ByteBuffer retPayload = sendHeader(inputHeader,4,2);
-								retPayload.putInt(-101);
+								retPayload.putInt(-100);
 								out.write(retPayload.array());
 							}else {
 								int id = hamsterLib.lookup(owner, hamster);
@@ -289,7 +289,7 @@ public class HamsterServerCommandLine {
 							String owner = generateName(ownerIn);
 							if(owner==null){
 								ByteBuffer retPayload = sendHeader(inputHeader,4,2);
-								retPayload.putInt(-101);
+								retPayload.putInt(-100);
 								out.write(retPayload.array());
 							}else {
 								int price = hamsterLib.collect(owner);

@@ -46,7 +46,7 @@ public class HamsterClient {
     }
 
     public void feed(String owner, String hamster, short treats) throws StatusRuntimeException {
-        FeedHamsterRequest request = FeedHamsterRequest.newBuilder().setOwner(owner).build();
+        FeedHamsterRequest request = FeedHamsterRequest.newBuilder().setOwner(owner).setHamster(hamster).setTreats(treats).build();
         FeedHamsterResponse response;
         try{
             response = blockingStub.feedHamster(request);

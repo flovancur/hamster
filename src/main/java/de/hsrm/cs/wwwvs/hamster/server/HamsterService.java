@@ -11,4 +11,31 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
 
     private HamsterLib lib = new HamsterLib();
 
+    @Override
+    public void addHamster(NewHamsterRequest data, StreamObserver<NewHamsterResponse> responseObserver)    {
+        String owner = data.getOwner();
+        String hamster = data.getHamster();
+        short treats = (short) data.getTreats();
+
+        try{
+            int id = lib.new_(owner, hamster, treats);
+            NewHamsterResponse response = NewHamsterResponse.newBuilder().setId(id).build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        }catch(HamsterNameTooLongException e){
+            Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+
+        }catch(HamsterAlreadyExistsException e){
+            Status status = Status.ALREADY_EXISTS.withDescription(e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+
+        }catch (HamsterStorageException | HamsterDatabaseCorruptException e) {
+            System.out.println("HamsterStorageException oder HamsterDatabaseCorruptException");
+            Status status = Status.UNKNOWN.withDescription(e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+        }
+    }
+
 }

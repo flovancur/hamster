@@ -7,7 +7,15 @@ option java_package = "de.hsrm.cs.wwwvs.hamster.rpc";
 option java_outer_classname = "HamsterProto";
 
 service HamsterService {
-	// TODO: add services
+	rpc addHamster(NewHamsterRequest) returns (NewHamsterResponse);
 }
 
-// TODO: add message definitions
+message NewHamsterRequest{
+	string owner = 1;
+	string hamster = 2;
+	int32 treats = 3;
+}
+
+message NewHamsterResponse{
+	int32 id = 1;
+}

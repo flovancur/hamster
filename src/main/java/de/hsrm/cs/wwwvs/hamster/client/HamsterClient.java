@@ -2,6 +2,7 @@ package de.hsrm.cs.wwwvs.hamster.client;
 
 import de.hsrm.cs.wwwvs.hamster.rpc.*;
 import io.grpc.*;
+import io.grpc.stub.StreamObserver;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -9,6 +10,8 @@ import java.net.SocketAddress;
 
 public class HamsterClient {
 
+    private final HamsterServiceGrpc.HamsterServiceStub asyncstub;
+    private final HamsterServiceGrpc.HamsterServiceBlockingStub blockingStub;
     public HamsterClient(String hostName, int port) {
         var channel = ManagedChannelBuilder.forAddress(hostName, port)
                 .proxyDetector(new ProxyDetector() {
@@ -20,7 +23,9 @@ public class HamsterClient {
                 })
                 .usePlaintext()
                 .build();
-        // TODO
+
+        blockingStub = HamsterServiceGrpc.newBlockingStub(channel);
+        asyncstub = HamsterServiceGrpc.newStub(channel);
     }
 
 
@@ -30,7 +35,14 @@ public class HamsterClient {
     }
 
     public void add(String owner, String hamster, short treats) throws StatusRuntimeException {
-        // TODO: implement
+        NewHamsterRequest request = NewHamsterRequest.newBuilder().setOwner(owner).setHamster(hamster).setTreats(treats).build();
+        NewHamsterResponse response;
+        try{
+            response = blockingStub.addHamster(request);
+            System.out.println(response.getId());
+        }catch(StatusRuntimeException e){
+            System.out.println("RPC failed: {0} " + e.getStatus());
+        }
     }
 
     public void feed(String owner, String hamster, short treats) throws StatusRuntimeException {

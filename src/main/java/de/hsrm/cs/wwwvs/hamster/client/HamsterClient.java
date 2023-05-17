@@ -46,7 +46,14 @@ public class HamsterClient {
     }
 
     public void feed(String owner, String hamster, short treats) throws StatusRuntimeException {
-        // TODO: implement
+        FeedHamsterRequest request = FeedHamsterRequest.newBuilder().setOwner(owner).build();
+        FeedHamsterResponse response;
+        try{
+            response = blockingStub.feedHamster(request);
+            System.out.println(response.getTreatsLeft());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void state(String owner, String hamster) throws StatusRuntimeException {
@@ -54,6 +61,13 @@ public class HamsterClient {
     }
 
     public void bill(String owner) throws StatusRuntimeException {
-        // TODO: implement
+        BillHamsterRequest request = BillHamsterRequest.newBuilder().setOwner(owner).build();
+        BillHamsterResponse response;
+        try{
+            response = blockingStub.billHamster(request);
+            System.out.println(response.getPrice());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

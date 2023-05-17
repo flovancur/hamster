@@ -8,6 +8,10 @@ option java_outer_classname = "HamsterProto";
 
 service HamsterService {
 	rpc addHamster(NewHamsterRequest) returns (NewHamsterResponse);
+
+	rpc billHamster(BillHamsterRequest) returns (BillHamsterResponse);
+
+	rpc feedHamster(FeedHamsterRequest) returns (FeedHamsterResponse);
 }
 
 message NewHamsterRequest{
@@ -18,4 +22,22 @@ message NewHamsterRequest{
 
 message NewHamsterResponse{
 	int32 id = 1;
+}
+
+message BillHamsterRequest{
+	string owner = 1;
+}
+
+message BillHamsterResponse{
+	int32 price = 1;
+}
+
+message FeedHamsterRequest{
+	string owner = 1;
+	string hamster = 2;
+	int32 treats = 3;
+}
+
+message FeedHamsterResponse{
+	int32 treatsLeft = 1;
 }

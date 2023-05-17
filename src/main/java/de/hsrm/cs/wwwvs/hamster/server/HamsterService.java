@@ -23,19 +23,41 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
 
-        }catch(HamsterNameTooLongException e){
-            Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+        } catch (HamsterNameTooLongException | HamsterStorageException | HamsterAlreadyExistsException |
+                 HamsterDatabaseCorruptException e) {
+            throw new RuntimeException(e);
+        }
+    };
 
-        }catch(HamsterAlreadyExistsException e){
-            Status status = Status.ALREADY_EXISTS.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
-
-        }catch (HamsterStorageException | HamsterDatabaseCorruptException e) {
-            System.out.println("HamsterStorageException oder HamsterDatabaseCorruptException");
-            Status status = Status.UNKNOWN.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+    @Override
+    public void billHamster(BillHamsterRequest data, StreamObserver<BillHamsterResponse> responseObserver){
+        String owner = data.getOwner();
+        try{
+            int price = lib.collect(owner);
+            BillHamsterResponse response = BillHamsterResponse.newBuilder().setPrice(price).build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (HamsterNameTooLongException | HamsterNotFoundException | HamsterStorageException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
+
+    @Override
+    public void feedHamster(FeedHamsterRequest data, StreamObserver<FeedHamsterResponse> responseObserver){
+        String owner = data.getOwner();
+        String hamster = data.getHamster();
+        short treats = (short) data.getTreats();
+        try{
+            int id = lib.lookup(owner,hamster);
+            int treatsLeft = lib.givetreats(id, treats);
+            FeedHamsterResponse response = FeedHamsterResponse.newBuilder().setTreatsLeft(treatsLeft).build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (HamsterNameTooLongException | HamsterNotFoundException | HamsterStorageException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+    };
+
 
 }

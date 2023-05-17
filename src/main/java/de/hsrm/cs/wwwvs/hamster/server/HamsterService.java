@@ -46,9 +46,14 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
             BillHamsterResponse response = BillHamsterResponse.newBuilder().setPrice(price).build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-        } catch (HamsterNameTooLongException | HamsterNotFoundException | HamsterStorageException e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (HamsterNotFoundException | HamsterStorageException e) {
+            Status status = Status.NOT_FOUND.withDescription(e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+        } catch (HamsterNameTooLongException e) {
+            Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
         }
+
     }
 
     @Override

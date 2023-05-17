@@ -51,8 +51,8 @@ public class HamsterClient {
         try{
             response = blockingStub.feedHamster(request);
             System.out.println(response.getTreatsLeft());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        }catch(StatusRuntimeException e){
+            System.out.println("RPC failed: {0} " + e.getStatus());
         }
     }
 
@@ -66,8 +66,8 @@ public class HamsterClient {
         try{
             response = blockingStub.billHamster(request);
             System.out.println(response.getPrice());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch(StatusRuntimeException e){
+            System.out.println("RPC failed: {0} " + e.getStatus());
         }
     }
 }

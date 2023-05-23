@@ -43,7 +43,7 @@ public class HamsterClient {
             System.out.println(e.getStatus().getDescription());
             return true;
         }
-        return false;
+        return true;
     }
 
     public void add(String owner, String hamster, short treats) throws StatusRuntimeException {

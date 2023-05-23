@@ -24,16 +24,10 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
 
-        }  catch (HamsterAlreadyExistsException e) {
-            Status status = Status.ALREADY_EXISTS.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
-        } catch (HamsterNameTooLongException e) {
-            Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
-        } catch (HamsterStorageException | HamsterDatabaseCorruptException e) {
-            System.out.println("HamsterStorageException oder HamsterDatabaseCorruptException");
-            Status status = Status.UNKNOWN.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+        }  catch (HamsterException e) {
+            responseObserver.onError(
+                    Status.ABORTED.withDescription(e.getMessage()).asException()
+            );
         }
 
 
@@ -55,15 +49,11 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
             FeedHamsterResponse response = FeedHamsterResponse.newBuilder().setTreatsLeft(treatsLeft).build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-        } catch (HamsterNotFoundException | HamsterStorageException e) {
-            Status status = Status.NOT_FOUND.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
-        } catch (HamsterNameTooLongException e) {
-            Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+        } catch (HamsterException e) {
+            responseObserver.onError(
+                    Status.ABORTED.withDescription(e.getMessage()).asException()
+            );
         }
-
-
     };
 
     @Override
@@ -74,12 +64,10 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
             BillHamsterResponse response = BillHamsterResponse.newBuilder().setPrice(price).build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-        } catch (HamsterNotFoundException | HamsterStorageException e) {
-            Status status = Status.NOT_FOUND.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
-        } catch (HamsterNameTooLongException e) {
-            Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+        } catch (HamsterException e) {
+            responseObserver.onError(
+                    Status.ABORTED.withDescription(e.getMessage()).asException()
+            );
         }
 
     }
@@ -106,15 +94,12 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
                         .setTreatsLeft(treats)
                         .build();
                 responseObserver.onNext(response);
-            }catch (HamsterNameTooLongException e) {
-                Status status = Status.INVALID_ARGUMENT.withDescription(e.getMessage());
-                responseObserver.onError(new Throwable(status+"the specified name is too long"));
-            }  catch (HamsterNotFoundException e) {
-                Status status = Status.NOT_FOUND.withDescription(e.getMessage());
-                responseObserver.onError(new Throwable(status+"A hamster or hamster owner could not be found."));
-            } catch (HamsterEndOfDirectoryException e) {
-                Status status = Status.NOT_FOUND.withDescription(e.getMessage());
-                responseObserver.onError(new Throwable("End of Directory"));
+            } catch (HamsterEndOfDirectoryException ignored){
+
+            }catch (HamsterException e) {
+                responseObserver.onError(
+                        Status.ABORTED.withDescription(e.getMessage()).asException()
+                );
             }
 
         }

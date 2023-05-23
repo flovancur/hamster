@@ -29,9 +29,21 @@ public class HamsterClient {
     }
 
 
-    public boolean list(String ownerName, String hamsterName) throws StatusRuntimeException {
-        // TODO: implement, return false if no hamster found
-        return false;
+    public boolean list(String owner, String hamster) throws StatusRuntimeException {
+        String new_owner = owner == null ? "": owner;
+        String new_hamster = hamster == null ? "": hamster;
+        ListHamsterRequest request = ListHamsterRequest.newBuilder().setOwner(new_owner).setHamster(new_hamster).build();
+        var response = this.blockingStub.listHamster(request);
+        try {
+            while(response.hasNext()){
+                ListHamsterResponse singleResponse = response.next();
+                System.out.println(singleResponse.getOwner()+" " + singleResponse.getHamster()+" " + singleResponse.getCost() +" € " + singleResponse.getTreatsLeft());
+            }
+        }catch(StatusRuntimeException e){
+            System.out.println(e.getStatus().getDescription());
+            return false;
+        }
+        return true;
     }
 
     public void add(String owner, String hamster, short treats) throws StatusRuntimeException {
@@ -57,8 +69,17 @@ public class HamsterClient {
     }
 
     public void state(String owner, String hamster) throws StatusRuntimeException {
-        // TODO: implement
-    }
+        StateRequest request = StateRequest.newBuilder().setOwner(owner).setHamster(hamster).build();
+        StateResponse response;
+        try {
+            response = this.blockingStub.state(request);
+            System.out.println(response.getOwner()+" "+response.getHamster()+" "+response.getTreatsLeft()+" "+response.getCost());
+        } catch (StatusRuntimeException e) {
+            System.out.println(e.getStatus().getDescription());
+        }
+
+    };
+
 
     public void bill(String owner) throws StatusRuntimeException {
         BillHamsterRequest request = BillHamsterRequest.newBuilder().setOwner(owner).build();

@@ -12,6 +12,10 @@ service HamsterService {
 	rpc billHamster(BillHamsterRequest) returns (BillHamsterResponse);
 
 	rpc feedHamster(FeedHamsterRequest) returns (FeedHamsterResponse);
+
+	rpc listHamster(ListHamsterRequest) returns (stream ListHamsterResponse);
+
+	rpc state(StateRequest) returns (StateResponse);
 }
 
 message NewHamsterRequest{
@@ -40,4 +44,28 @@ message FeedHamsterRequest{
 
 message FeedHamsterResponse{
 	int32 treatsLeft = 1;
+}
+
+message ListHamsterRequest{
+	string owner = 1;
+	string hamster = 2;
+}
+
+message ListHamsterResponse{
+ string owner = 1;
+ string hamster = 2;
+ int32 cost = 3;
+ int32 treatsLeft = 4;
+}
+
+message StateRequest {
+	string owner = 1;
+	string hamster = 2;
+}
+
+message StateResponse {
+	string owner = 1;
+	string hamster = 2;
+	int32 treatsLeft = 3;
+	int32 cost = 4;
 }

@@ -22,7 +22,7 @@ build:
     - docker
   stage: build
   script: 
-    - 'dotnet restore --packages $NUGET_PACKAGES_DIRECTORY src'
+    - 'dotnet restore --packages $NUGET_PACKAGES_DIRECTORY'
     - 'dotnet build --no-restore'
 
 test-code-job1:
@@ -30,7 +30,7 @@ test-code-job1:
     - docker
   stage: test
   script:
-    - 'dotnet restore --packages $NUGET_PACKAGES_DIRECTORY src'
+    - 'dotnet restore --packages $NUGET_PACKAGES_DIRECTORY'
     - 'dotnet test --no-restore --logger "junit;LogFilePath=testresults.xml"'
   artifacts:
     when: always

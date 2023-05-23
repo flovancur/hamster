@@ -40,6 +40,7 @@ public class HamsterClient {
                 System.out.println(singleResponse.getOwner()+" " + singleResponse.getHamster()+" " + singleResponse.getCost() +" € " + singleResponse.getTreatsLeft());
             }
         }catch(StatusRuntimeException e){
+            if(e.getStatus().getDescription().equals("End of Directory"))return true;
             System.out.println(e.getStatus().getDescription());
             return false;
         }

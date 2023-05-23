@@ -1,0 +1,37 @@
+.vs/
+**/obj/
+**/bin/
+**/*.csproj.user
+Build/
+**/launchSettings.json
+**/*.nupkg
+/Tests/Generator.Tests/Properties/PublishProfiles
+*.user
+
+### VS Code ###
+.vscode/
+
+hamster
+!tests/hamster
+!HamsterRPC_Client/src/main/java/de/hsrm/cs/wwwvs/hamster
+!HamsterRPC_Client/src/test/java/de/hsrm/cs/wwwvs/hamster
+!src/main/java/de/hsrm/cs/wwwvs/hamster
+hamster_server
+hamsterfile.dat
+hamsterdatastore.xml
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# IDEs
+**/.vscode/
+**/.idea/
+
+# Test results
+HamsterIoHTests\testresults.xml

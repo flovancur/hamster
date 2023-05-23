@@ -112,9 +112,8 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
             }  catch (HamsterNotFoundException e) {
                 Status status = Status.NOT_FOUND.withDescription(e.getMessage());
                 responseObserver.onError(new Throwable(status+"A hamster or hamster owner could not be found."));
-            } catch (HamsterEndOfDirectoryException e) {
-                Status status = Status.UNKNOWN.withDescription(e.getMessage());
-                responseObserver.onError(new Throwable(status+"EndOfDirectory"));
+            } catch (HamsterEndOfDirectoryException ignored) {
+
             }
 
         }

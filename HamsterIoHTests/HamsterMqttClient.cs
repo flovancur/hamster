@@ -9,13 +9,26 @@ namespace HamsterIoHTests
 {
     public class HamsterMqttClient
     {
-        public static string ClientExecutable { get; set; } = "dotnet ../../../../build/net7.0/HamsterMqttClient.dll";
+        public static string ClientExecutable { get; set; } = "./hamster_mqtt";
 
         private Process? _clientProcess;
         private TaskCompletionSource<string>? _clientResponse;
 
+        private static string FindWorkingDirectory()
+        {
+            var dir = Path.GetFullPath(Environment.CurrentDirectory);
+            while (dir != null && !Directory.Exists(Path.Combine(dir, "HamsterIoHTests")))
+            {
+                dir = Path.GetDirectoryName(dir);
+            }
+            return dir!;
+        }
+
+
         public HamsterMqttClient(int hamsterId, string? options)
         {
+            Environment.CurrentDirectory = FindWorkingDirectory();
+
             var commandString = $"{ClientExecutable} {hamsterId} -s {options}";
             var firstSpace = commandString.IndexOf(' ');
             var processStartInfo = new ProcessStartInfo
@@ -26,6 +39,7 @@ namespace HamsterIoHTests
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                WorkingDirectory = Environment.CurrentDirectory,
             };
             _clientProcess = Process.Start(processStartInfo);
         }

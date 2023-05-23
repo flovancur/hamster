@@ -32,12 +32,15 @@ namespace HamsterIoHTests
                     .WithPayload(bytes)
                     .Build()));
 
+            var expected = $"{amount} fondles received for Hamster {HamsterId}";
+
             if (Task.WaitAny(waitForLog, Task.Delay(5000)) != 0)
             {
-                Assert.Fail("Client did not receive message");
+                Console.WriteLine("Failed to detect message, expected " + expected);
+                Assert.Fail("Client did not receive message, expected " + expected);
             }
 
-            Assert.That(waitForLog.Result, Is.EqualTo($"> {amount} fondles received for Hamster {HamsterId}"));
+            StringAssert.EndsWith(expected, waitForLog.Result);
         }
 
         private static byte[] GetBytesForInt32(int amount)
@@ -97,12 +100,15 @@ namespace HamsterIoHTests
                         .WithPayload(bytes)
                         .Build()));
 
+                var expected = $"{1} fondles received for Hamster {HamsterId}";
+
                 if (Task.WaitAny(waitForLog, Task.Delay(5000)) != 0)
                 {
-                    Assert.Fail("Client did not receive message");
+                    Console.WriteLine("Failed to detect message, expected " + expected);
+                    Assert.Fail("Client did not receive message, expected " + expected);
                 }
 
-                StringAssert.EndsWith($"{1} fondles received for Hamster {HamsterId}", waitForLog.Result);
+                StringAssert.EndsWith(expected, waitForLog.Result);
             }
         }
     }

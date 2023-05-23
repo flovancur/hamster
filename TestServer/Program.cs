@@ -87,4 +87,20 @@ server.ClientConnectedAsync += OnClientConnected;
 server.ClientDisconnectedAsync += OnClientDisconnected;
 server.ClientSubscribedTopicAsync += OnClientSubscribed;
 server.ApplicationMessageNotConsumedAsync += OnMessagePublished;
-Console.ReadLine();
+
+var tcs = new TaskCompletionSource<bool>();
+var sigintReceived = false;
+Console.CancelKeyPress += (_, ea) =>
+{
+    ea.Cancel = true;
+    tcs.SetResult(true);
+    sigintReceived = true;
+};
+AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+{
+    if (!sigintReceived)
+    {
+        tcs.SetResult(false);
+    }
+};
+tcs.Task.Wait();

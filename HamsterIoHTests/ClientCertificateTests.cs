@@ -27,7 +27,7 @@ namespace HamsterIoHTests
                 dir = Path.GetDirectoryName(dir);
             }
 
-            return Path.Combine(dir, "certs", "client.pfx");
+            return Path.Combine(dir!, "certs", "client.pfx");
         }
 
         protected override MqttServerOptions CreateServerOptions()

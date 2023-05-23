@@ -185,8 +185,14 @@ namespace HamsterIoHTests
         [TearDown]
         public void TearDown()
         {
-            _client.Terminate();
-            _server.StopAsync().Wait();
+            if (_client != null)
+            {
+                _client.Terminate();
+            }
+            if (_server != null)
+            {
+                _server.StopAsync().Wait();
+            }
         }
     }
 }

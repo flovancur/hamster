@@ -32,19 +32,6 @@ namespace HamsterIoHTests
             return "-e";
         }
 
-        X509Certificate2 CompensateWindowsEpheralKeysProblem(X509Certificate2 cert)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // SSLStream on Windows throws with ephemeral key sets
-                // workaround from https://github.com/dotnet/runtime/issues/23749#issuecomment-388231655
-                var originalCert = cert;
-                cert = new X509Certificate2(cert.Export(X509ContentType.Pkcs12));
-                originalCert.Dispose();
-            }
-            return cert;
-        }
-
         protected override MqttServerOptions CreateServerOptions()
         {
             return MqttFactory.CreateServerOptionsBuilder()

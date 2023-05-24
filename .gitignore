@@ -11,14 +11,6 @@ Build/
 ### VS Code ###
 .vscode/
 
-hamster
-!tests/hamster
-!HamsterRPC_Client/src/main/java/de/hsrm/cs/wwwvs/hamster
-!HamsterRPC_Client/src/test/java/de/hsrm/cs/wwwvs/hamster
-!src/main/java/de/hsrm/cs/wwwvs/hamster
-hamster_server
-hamsterfile.dat
-hamsterdatastore.xml
 
 # Kernel Module Compile Results
 *.mod*
@@ -32,6 +24,12 @@ dkms.conf
 # IDEs
 **/.vscode/
 **/.idea/
+.idea/
+
+# Java build artifacts
+.gradle/
+build/
+bin/
 
 # Test results
 HamsterIoHTests\testresults.xml

@@ -9,7 +9,7 @@ namespace HamsterIoHTests
 {
     public class HamsterMqttClient
     {
-        public static string ClientExecutable { get; set; } = "./hamster_mqtt";
+        public static string ClientExecutable { get; set; } = "java -jar ./build/libs/hamster_mqtt-0.0.1-SNAPSHOT.jar";
 
         private Process? _clientProcess;
         private TaskCompletionSource<string>? _clientResponse;

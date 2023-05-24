@@ -16,18 +16,7 @@ namespace HamsterIoHTests
 
         protected override string? CreateClientOptions()
         {
-            return $"-e -c \"{GetCertsPath()}\"";
-        }
-
-        private static string GetCertsPath()
-        {
-            var dir = Path.GetFullPath(Environment.CurrentDirectory);
-            while (!Directory.Exists(Path.Combine(dir!, "certs")))
-            {
-                dir = Path.GetDirectoryName(dir);
-            }
-
-            return Path.Combine(dir!, "certs", "client.pfx");
+            return $"-e -c";
         }
 
         protected override MqttServerOptions CreateServerOptions()

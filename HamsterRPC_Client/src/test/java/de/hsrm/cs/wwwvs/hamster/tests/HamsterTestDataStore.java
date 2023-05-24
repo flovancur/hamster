@@ -223,6 +223,17 @@ public class HamsterTestDataStore {
 		});
 		outThread.start();
 
+		Thread errThread = new Thread(() -> {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(finalSut.getErrorStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("Server: " + line);
+				}
+			} catch (Exception e) {
+			}
+		});
+		errThread.start();
+
 		assertTrue("Server process is not running.", sut.isAlive());
 
 		HamsterTestDataStore.sleepMax();

@@ -34,14 +34,15 @@ public class HamsterClient {
         String new_hamster = hamster == null ? "": hamster;
         ListHamsterRequest request = ListHamsterRequest.newBuilder().setOwner(new_owner).setHamster(new_hamster).build();
         var response = this.blockingStub.listHamster(request);
+        System.out.println("Owner\tName\tPrice\ttreats left");
         try {
             while(response.hasNext()){
                 ListHamsterResponse singleResponse = response.next();
-                System.out.println(singleResponse.getOwner()+" " + singleResponse.getHamster()+" " + singleResponse.getCost() +" € " + singleResponse.getTreatsLeft());
+                System.out.println(singleResponse.getOwner()+"\t" + singleResponse.getHamster()+"\t" + singleResponse.getCost() +" â‚¬\t" + singleResponse.getTreatsLeft());
             }
         }catch(StatusRuntimeException e){
             System.out.println(e.getStatus().getDescription());
-            return true;
+            return false;
         }
         return true;
     }
@@ -73,7 +74,18 @@ public class HamsterClient {
         StateResponse response;
         try {
             response = this.blockingStub.state(request);
-            System.out.println(response.getOwner()+" "+response.getHamster()+" "+response.getTreatsLeft()+" "+response.getCost());
+            System.out.println(
+                    response.getOwner() +
+                            " hamster " +
+                            response.getHamster() +
+                            " has done " +
+                            "has " +
+                            response.getTreatsLeft() +
+                            " treats left in store " +
+                            "price is " +
+                            response.getCost() +
+                            " "
+            );
         } catch (StatusRuntimeException e) {
             System.out.println(e.getStatus().getDescription());
         }

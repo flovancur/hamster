@@ -32,4 +32,4 @@ build/
 bin/
 
 # Test results
-HamsterIoHTests\testresults.xml
+HamsterIoHTests/testresults.xml

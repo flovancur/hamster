@@ -95,6 +95,7 @@ public class HamsterService extends HamsterServiceGrpc.HamsterServiceImplBase {
                         .build();
                 responseObserver.onNext(response);
             } catch (HamsterEndOfDirectoryException ignored){
+
             } catch (HamsterNameTooLongException | HamsterNotFoundException e){
                 responseObserver.onError(Status.ABORTED.withDescription(e.getMessage()).asException());
             }

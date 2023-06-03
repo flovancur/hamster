@@ -25,6 +25,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @RestController
@@ -96,15 +97,75 @@ public class HamsterController {
             .build();
 
             @PostMapping("/hamster")
-            public String addHamster(@RequestBody HamsterClient.AddHamster hamster){
+            public int add(@RequestBody HamsterClient.AddHamster hamster){
                 try {
-                    int id = hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats());
-                    return "" + id;
+                    return hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats());
                 } catch (HamsterException e) {
                     throw new ResponseStatusException(
                             HttpStatus.BAD_REQUEST, e.getMessage());
                 }
             }
+
+            @PostMapping("/hamster/{owner}/{hamster}")
+            public int feed(@PathVariable String owner, @PathVariable String hamster,@RequestBody HamsterClient.FeedHamster treats){
+                try {
+                    int id = hamsterLib.lookup(owner, hamster);
+                    return hamsterLib.givetreats(id, (short)treats.treats());
+                } catch (HamsterException e) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, e.getMessage());
+                }
+            }
+
+            @GetMapping("/hamster/{owner}/{hamster}")
+            public HamsterClient.StateHamster state(@PathVariable String owner, @PathVariable String hamster){
+                try{
+                    int id = hamsterLib.lookup(owner, hamster);
+                    HamsterState hamsterState = new HamsterState();
+                    int success = hamsterLib.howsdoing(id, hamsterState);
+                    return new HamsterClient.StateHamster(owner, hamster, hamsterState.getCost(), hamsterState.getRounds(),hamsterState.getTreatsLeft());
+
+                }catch (HamsterException e) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, e.getMessage());
+                }
+            }
+
+            @DeleteMapping("/hamster/{owner}")
+            public String bill(@PathVariable String owner){
+                try{
+                    return ""+ hamsterLib.collect(owner);
+                }catch (HamsterException e) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, e.getMessage());
+                }
+            }
+
+            @GetMapping("/hamster/{owner}")
+            public List list(@PathVariable String owner){
+                List<HamsterClient.ListHamster> response = new ArrayList<>();
+                try{
+                    var outOwner = hamsterLib.new OutString();
+                    var outHamster = hamsterLib.new OutString();
+                    var outPrice = hamsterLib.new OutShort();
+                    HamsterIterator iterator = hamsterLib.iterator();
+                    while(iterator.hasNext()){
+                        int id = hamsterLib.directory(iterator,owner,null);
+                        int treats = hamsterLib.readentry(id, outOwner,outHamster,outPrice);
+                        HamsterClient.ListHamster entry = new HamsterClient.ListHamster(outOwner.getValue(),outHamster.getValue(),treats ,outPrice.getValue());
+                        response.add(entry);
+                    }
+                    return response;
+                }catch (HamsterEndOfDirectoryException ignored){
+                    return response;
+                } catch (HamsterNameTooLongException | HamsterNotFoundException e){
+
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, e.getMessage());
+                }
+            }
+
+
     @ExceptionHandler(ResponseStatusException.class)
     public String handleException(ResponseStatusException e) {
         // Return the error message

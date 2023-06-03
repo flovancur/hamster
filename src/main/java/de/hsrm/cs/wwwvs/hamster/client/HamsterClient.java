@@ -26,11 +26,15 @@ public class HamsterClient {
 
     public boolean list(String ownerName, String hamsterName) throws Exception {
         String url = hostName.concat("/hamster/"+ownerName);
-        ResponseEntity<List<ListHamster>> response = restTemplate.exchange(url, HttpMethod.GET,null, new ParameterizedTypeReference<List<ListHamster>>() {});
-        List<ListHamster> hamsterList = response.getBody();
-        return false;
+        ResponseEntity<ListHamster[]> response = restTemplate.getForEntity(url, ListHamster[].class);
+        System.out.println("Owner\tName\tPrice\ttreats left");
+        for(ListHamster entry: response.getBody()){
+            System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+"\t"+entry.treats);
+        }
+        return true;
     }
     public record ListHamster(String owner, String hamster, int treats, int price){};
+
 
     public void add(String owner, String hamster, short treats) throws Exception {
         String url = hostName.concat("/hamster");

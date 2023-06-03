@@ -141,29 +141,31 @@ public class HamsterController {
                 }
             }
 
-            @GetMapping("/hamster/{owner}")
-            public List list(@PathVariable String owner){
-                List<HamsterClient.ListHamster> response = new ArrayList<>();
-                try{
-                    var outOwner = hamsterLib.new OutString();
-                    var outHamster = hamsterLib.new OutString();
-                    var outPrice = hamsterLib.new OutShort();
-                    HamsterIterator iterator = hamsterLib.iterator();
-                    while(iterator.hasNext()){
-                        int id = hamsterLib.directory(iterator,owner,null);
-                        int treats = hamsterLib.readentry(id, outOwner,outHamster,outPrice);
-                        HamsterClient.ListHamster entry = new HamsterClient.ListHamster(outOwner.getValue(),outHamster.getValue(),treats ,outPrice.getValue());
-                        response.add(entry);
-                    }
-                    return response;
-                }catch (HamsterEndOfDirectoryException ignored){
-                    return response;
-                } catch (HamsterNameTooLongException | HamsterNotFoundException e){
-
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, e.getMessage());
-                }
+    @GetMapping("/hamster/{owner}")
+    public List list(@PathVariable String owner){
+        List<HamsterClient.ListHamster> response = new ArrayList<>();
+        owner = owner.equals("null") ? null : owner;
+        try{
+            var outOwner = hamsterLib.new OutString();
+            var outHamster = hamsterLib.new OutString();
+            var outPrice = hamsterLib.new OutShort();
+            HamsterIterator iterator = hamsterLib.iterator();
+            while(iterator.hasNext()){
+                int id = hamsterLib.directory(iterator,owner,null);
+                int treats = hamsterLib.readentry(id, outOwner,outHamster,outPrice);
+                HamsterClient.ListHamster entry = new HamsterClient.ListHamster(outOwner.getValue(),outHamster.getValue(),treats ,outPrice.getValue());
+                response.add(entry);
             }
+            return response;
+        }catch (HamsterEndOfDirectoryException ignored){
+            return response;
+        } catch (HamsterNameTooLongException | HamsterNotFoundException e){
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
 
 
     @ExceptionHandler(ResponseStatusException.class)

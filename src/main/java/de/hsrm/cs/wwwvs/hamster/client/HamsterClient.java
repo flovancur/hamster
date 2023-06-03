@@ -27,14 +27,14 @@ public class HamsterClient {
     public boolean list(String ownerName, String hamsterName) throws Exception {
         String url = hostName.concat("/hamster/"+ownerName);
         ResponseEntity<ListHamster[]> response = restTemplate.getForEntity(url, ListHamster[].class);
+
         System.out.println("Owner\tName\tPrice\ttreats left");
         for(ListHamster entry: response.getBody()){
-            System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" e\t"+entry.treats);
+            System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" €\t"+entry.treats);
         }
         return true;
     }
     public record ListHamster(String owner, String hamster, int treats, int price){};
-
 
     public void add(String owner, String hamster, short treats) throws Exception {
         String url = hostName.concat("/hamster");
@@ -46,7 +46,9 @@ public class HamsterClient {
 
     public void feed(String owner, String hamster, short treats) throws Exception {
         // TODO: feed hamster, print remaining treats to stdout (only the number)
-        if(treats<0) throw new Exception("Number of negative treats not allowed");
+        if (treats < 0) {
+            throw new Exception("Negative number of treats not allowed");
+        }
         String url = hostName.concat("/hamster/"+owner+"/"+hamster);
         FeedHamster feedHamster = new FeedHamster(treats);
         ResponseEntity<String> response = restTemplate.postForEntity(url, feedHamster, String.class);

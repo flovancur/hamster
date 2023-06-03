@@ -96,50 +96,50 @@ public class HamsterController {
             })
             .build();
 
-            @PostMapping("/hamster")
-            public int add(@RequestBody HamsterClient.AddHamster hamster){
-                try {
-                    return hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats());
-                } catch (HamsterException e) {
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, e.getMessage());
-                }
-            }
+    @PostMapping("/hamster")
+    public int add(@RequestBody HamsterClient.AddHamster hamster){
+        try {
+            return hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats());
+        } catch (HamsterException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 
-            @PostMapping("/hamster/{owner}/{hamster}")
-            public int feed(@PathVariable String owner, @PathVariable String hamster,@RequestBody HamsterClient.FeedHamster treats){
-                try {
-                    int id = hamsterLib.lookup(owner, hamster);
-                    return hamsterLib.givetreats(id, (short)treats.treats());
-                } catch (HamsterException e) {
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, e.getMessage());
-                }
-            }
+    @PostMapping("/hamster/{owner}/{hamster}")
+    public int feed(@PathVariable String owner, @PathVariable String hamster,@RequestBody HamsterClient.FeedHamster treats){
+        try {
+            int id = hamsterLib.lookup(owner, hamster);
+            return hamsterLib.givetreats(id, (short)treats.treats());
+        } catch (HamsterException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 
-            @GetMapping("/hamster/{owner}/{hamster}")
-            public HamsterClient.StateHamster state(@PathVariable String owner, @PathVariable String hamster){
-                try{
-                    int id = hamsterLib.lookup(owner, hamster);
-                    HamsterState hamsterState = new HamsterState();
-                    int success = hamsterLib.howsdoing(id, hamsterState);
-                    return new HamsterClient.StateHamster(owner, hamster, hamsterState.getCost(), hamsterState.getRounds(),hamsterState.getTreatsLeft());
+    @GetMapping("/hamster/{owner}/{hamster}")
+    public HamsterClient.StateHamster state(@PathVariable String owner, @PathVariable String hamster){
+        try{
+            int id = hamsterLib.lookup(owner, hamster);
+            HamsterState hamsterState = new HamsterState();
+            int success = hamsterLib.howsdoing(id, hamsterState);
+            return new HamsterClient.StateHamster(owner, hamster, hamsterState.getCost(), hamsterState.getRounds(),hamsterState.getTreatsLeft());
 
-                }catch (HamsterException e) {
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, e.getMessage());
-                }
-            }
+        }catch (HamsterException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 
-            @DeleteMapping("/hamster/{owner}")
-            public String bill(@PathVariable String owner){
-                try{
-                    return ""+ hamsterLib.collect(owner);
-                }catch (HamsterException e) {
-                    throw new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, e.getMessage());
-                }
-            }
+    @DeleteMapping("/hamster/{owner}")
+    public String bill(@PathVariable String owner){
+        try{
+            return ""+ hamsterLib.collect(owner);
+        }catch (HamsterException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 
     @GetMapping("/hamster/{owner}")
     public List list(@PathVariable String owner){
@@ -157,9 +157,12 @@ public class HamsterController {
                 response.add(entry);
             }
             return response;
-        }catch (HamsterEndOfDirectoryException ignored){
+        }catch (HamsterEndOfDirectoryException ignored) {
             return response;
-        } catch (HamsterNameTooLongException | HamsterNotFoundException e){
+        } catch (HamsterNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "No hamsters matching criteria found");
+        } catch (HamsterNameTooLongException e){
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage());
@@ -167,11 +170,10 @@ public class HamsterController {
     }
 
 
-
     @ExceptionHandler(ResponseStatusException.class)
-    public String handleException(ResponseStatusException e) {
+    public ResponseEntity<String> handleException(ResponseStatusException e) {
         // Return the error message
-        return e.getReason();
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
 

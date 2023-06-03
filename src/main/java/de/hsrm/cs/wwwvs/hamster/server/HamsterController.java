@@ -1,5 +1,6 @@
 package de.hsrm.cs.wwwvs.hamster.server;
 
+import de.hsrm.cs.wwwvs.hamster.client.HamsterClient;
 import de.hsrm.cs.wwwvs.hamster.lib.*;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -15,8 +16,10 @@ import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.time.Duration;
@@ -26,9 +29,8 @@ import java.util.concurrent.Callable;
 
 @RestController
 public class HamsterController {
-
     private static Logger logger = LoggerFactory.getLogger(HamsterController.class);
-
+    private HamsterLib hamsterLib = new HamsterLib();
     private static CircuitBreakerRegistry circuitBreakers = CircuitBreakerRegistry
             .custom()
             .addRegistryEventConsumer(new RegistryEventConsumer<CircuitBreaker>() {
@@ -93,5 +95,21 @@ public class HamsterController {
             })
             .build();
 
-    // TODO: Add endpoints
+            @PostMapping("/hamster")
+            public String addHamster(@RequestBody HamsterClient.AddHamster hamster){
+                try {
+                    int id = hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats());
+                    return "" + id;
+                } catch (HamsterException e) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, e.getMessage());
+                }
+            }
+    @ExceptionHandler(ResponseStatusException.class)
+    public String handleException(ResponseStatusException e) {
+        // Return the error message
+        return e.getReason();
+    }
 }
+
+

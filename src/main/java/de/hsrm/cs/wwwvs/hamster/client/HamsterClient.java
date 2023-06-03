@@ -29,7 +29,7 @@ public class HamsterClient {
         ResponseEntity<ListHamster[]> response = restTemplate.getForEntity(url, ListHamster[].class);
         System.out.println("Owner\tName\tPrice\ttreats left");
         for(ListHamster entry: response.getBody()){
-            System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+"\t"+entry.treats);
+            System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" e\t"+entry.treats);
         }
         return true;
     }

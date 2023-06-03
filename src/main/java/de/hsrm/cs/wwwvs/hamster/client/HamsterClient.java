@@ -29,10 +29,17 @@ public class HamsterClient {
         ResponseEntity<ListHamster[]> response = restTemplate.getForEntity(url, ListHamster[].class);
 
         System.out.println("Owner\tName\tPrice\ttreats left");
-        for(ListHamster entry: response.getBody()){
-            System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" €\t"+entry.treats);
+        if(ownerName == null && hamsterName != null){
+            //List<HamsterClient.ListHamster> tmp = new ArrayList<>();
+            for(ListHamster entry: response.getBody()){
+                if(entry.hamster.equals(hamsterName)) System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" €\t"+entry.treats);;
+            }
+        } else {
+            for(ListHamster entry: response.getBody()){
+                System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" €\t"+entry.treats);
+            }
         }
-        return true;
+            return true;
     }
     public record ListHamster(String owner, String hamster, int treats, int price){};
 

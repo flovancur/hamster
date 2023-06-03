@@ -159,10 +159,14 @@ public class HamsterController {
             return response;
         }catch (HamsterEndOfDirectoryException ignored){
             return response;
-        } catch (HamsterNameTooLongException | HamsterNotFoundException e){
+        } catch (HamsterNameTooLongException e){
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (HamsterNotFoundException e){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "No hamsters matching criteria found"
+            );
         }
     }
 

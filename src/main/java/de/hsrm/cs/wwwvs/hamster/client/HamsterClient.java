@@ -46,6 +46,7 @@ public class HamsterClient {
 
     public void feed(String owner, String hamster, short treats) throws Exception {
         // TODO: feed hamster, print remaining treats to stdout (only the number)
+        if(treats<0) throw new Exception("Number of negative treats not allowed");
         String url = hostName.concat("/hamster/"+owner+"/"+hamster);
         FeedHamster feedHamster = new FeedHamster(treats);
         ResponseEntity<String> response = restTemplate.postForEntity(url, feedHamster, String.class);

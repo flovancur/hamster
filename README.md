@@ -1,69 +1,123 @@
-# HamsterLib
+# Projekt “Social Media Authentifizierung für die Hamsterverwaltung aka. HamsterAuth”, 20 Punkte
 
-Wer länger unterwegs ist, kann seine Goldhamster bei einem westhessischen
-Hamsterverwahrungsunternehmen abgeben. Die Verwaltung der Gasthamster soll
-nun durch ein neues IT-System unterstützt werden. Die Kunden können ihre
-Hamster abgeben und ihnen dabei optional einen Vorrat an Leckerli mitgeben. Für
-die Aufnahme eines Hamsters wird einmalig ein Grundbetrag von 17€ fällig.
-Die Hamster haben nichts besseres zu tun als ständig in ihrem Laufrad zu
-rennen, wodurch dieses mit einer Drehzahl von 25 Umdrehungen pro Minute
-rotiert. Diese Umdrehungen werden vom System erfasst und pro 1000 Umdrehungen
-erhöht sich der am Ende zu zahlende Betrag um 5€. Die Kunden können anrufen und
-sich nach dem Wohlergehen ihrer Lieblinge erkundigen. Für jeden Anruf
-dieser Art wird 1€ berechnet. Ausserdem können die Kunden ihrem Hamster
-Leckerli geben lassen. Ist dabei der anfängliche Vorrat an Leckerli erschöpft,
-so stellt das Hamsterasyl natürlich gerne weitere Leckerli zur Verfügung -- 
-allerdings zum Stückpreis von 2€.
+Beflügelt vom Erfolg des IoH hat der CEO des allseits bekannten
+westhessischen Anbieters von Kleintier-Management Lösungen beschlossen,
+die Hamsterverwaltung so umzustellen, dass Kunden nun durch eine
+Webanwendung selbst den Status ihrer lieben Kleinen abfragen können.
+Hierzu wurde für den bestehenden REST-Service von einer befreundeten
+Agentur auch eine Webanwendung ~~gebastelt~~ entwickelt.
 
-Zufällig entdeckt die IT-Abteilung des Hamsterverwahrungsunternehmens
-die Open-Source-Bibliothek *Hamsterlib*, die exakt die benötigten Funktionen implementiert,
-und die somit verwendet werden soll. Den Quellcode zu dieser Bibliothek
-finden Sie in diesem Git-Repository. Eigenartigerweise steht der Quellcode auch noch in
-mehreren Programmiersprachen zur Verfügung. 
+Um die am besten geeignete Plattform zu sondieren, wurde auch gleich
+eine international renomierte Agentur engagiert, die die Verbreitung von
+verschiedenen Social Media Accounts in der relevanten Zielgruppe
+untersuchen sollte.
 
-Machen Sie sich anhand der Dokumentation und dem Quellcode in \texttt{libsrc}
-mit den API-Funktionen der Bibliothek vertraut. Insgesamt bietet die Bibliothek
-sieben Funktionen.
+In umfangreichen Marketingstudien dieser Agentur hat sich klar
+herausgestellt, dass unter allen Teilnehmenden eine überraschend
+deutliche Mehrheit einen HDZ-Account besitzt. Etwaige Bedenken, dass
+sich im Freundeskreis des Werkstudenten, der mit der Durchführung der
+Studie betraut worden ist, einfach besonders viele Komilitonen befanden
+wurden zur Kenntnis genommen aber ansonsten als unwesentlich übergangen.
 
-Erstellen Sie daraus ein Programm **hamster**, das mit einem Kommandoparameter
-und (je nach Kommando) evtl. weiteren Parametern aufgerufen wird, und das
-folgende Funktionen unterstützt:
+Für die Integration des HDZ-Accounts wurde der Standard Open ID Connect
+ausgewählt, da der CTO beim Golfen vernommen hat, dass man damit sehr
+flexibel Accounts von verschiedensten IDPs integrieren können soll.
+Außerdem hat die besagte Agentur anhand eines YouTube-Videos auch schon
+eine Unterstützung von Open ID Connect in die entstandene Single Page
+Application eingebaut.
 
-- `hamster list`
+Leider wurde ein Großteil des Budgets bereits auf besagte
+Marketingstudien verwendet und wieso auch teures Geld für externe
+Berater verwenden, wenn man über interne Ressourcen verfügt, die so
+etwas schnell erledigen können? Schließlich existiert die Funktionalität
+ja schon, Sie müssen sie nur noch geeignet integrieren. Meint zumindest
+der CTO. Tatsächlich bezog sich die Agentur mit “Open ID Connect
+eingebaut” nur auf das Frontend. Für das Backend hat die Agentur
+eigentlich auch nur ein Skelett bekommen, mit dem gearbeitet wurde. Es
+ist also nicht viel mehr als ein Scherbenhaufen, den Sie jetzt aufkehren
+sollen.
 
-	Gibt eine Liste mit dem gesamten Hamsterbestand  (Namen, Preise und Leckerli-Vorrat) tabellarisch aus.
+## Zusammenfassung der Aufgabe
 
-- `hamster list Meier`
+-   Sie haben dieses mal bereits einen RESTful Webservice gegeben, der
+    allerdings derzeit unverschlüsselt auf HTTP Anfragen entgegen nimmt
+    und die Gegenseite sich nicht authentifizieren muss.
 
-	Gibt eine Liste mit den Hamstern des Besitzers *Meier* aus.
+-   Ihre Aufgabe besteht nun darin, den Webservice abzusichern. Diese
+    Absicherung soll zum Einen aus der Verwendung einer verschlüsselten
+    Verbindung, zum Anderen aus der Authentifikation und Autorisierung
+    von Anfragen bestehen.
 
-- `hamster add Schmidt Pausbackenbube`
+-   Für die Authentifizierung und Autorisierung der Anfragen soll das
+    aus der Vorlesung bekannte Protokoll OAuth 2.0 verwendet werden.
 
-	Fügt einen neuen Datensatz für den Hamster *Pausbackenbube* des Besitzers *Schmidt* mit dem
-	Standard-Anfangspreis 17€ (= Vollpension zzgl. Laufradbenutzung) hinzu.
+-   Die Endpunkte im Backend bestehen derzeit noch aus Skeletten. Sie
+    müssen Sie geeignet implementieren, indem Sie die Funktionalität auf
+    Grundlage der bekannten Hamsterlib implementieren.
 
-- `hamster add Schmidt Pausbackenbube 55`
+-   Die Endpunkte wurden von der Agentur auch so angepasst, dass nun der
+    Owner-Name nirgendwo mehr per Requestparameter mit übergeben wird.
+    Stattdessen sollen Sie nun den Namen des Users eintragen, der den
+    Request veranlasst hat.
 
-	Wie oben, jedoch erhält  *Pausbackenbube* einen Vorrat von 55 Leckerli mit auf den Weg.
+-   Es gibt einen zentralen Authorization Server für diese Aufgabe, der
+    auf der Open-Source Lösung Keycloak aufbaut. Dieser ist an das LDAP
+    der Hochschule angebunden. Sie können sich bei diesem Server daher
+    mit Ihrem HDS-Account anmelden.
 
-- `hamster feed Bilbo Baggins 3`
+## Token
 
-	Verfüttere 3 Leckerli an den Hamster *Baggins* des Besitzers *Bilbo*.
-	Falls der Leckerli-Vorrat von *Baggins* erschöpft ist, erhöht sich der Preis
-	um 2€ je Leckerli.
+Die Webanwendung wird HTTP Requests an Ihren Webserver schicken, die mit
+einem Authorization-Header versehen sind, in denen in einem Bearer ein
+signiertes JWT-Token enthalten ist. Schauen Sie sich diese Token bspw.
+mittels <https://jwt.io> an. Wie lange sind die Token gültig? Welche
+Informationen sind darin enthalten? Mit welchem Algorithmus wurde der
+Token signiert? Welcher Flowtyp von OAuth bzw. Open ID Connect wird
+verwendet?
 
-- `hamster state Dirk Dickbacke`
+## Webanwendung
 
-	Zustandsabfrage des Hamsters *Dickbacke* des Besitzers *Dirk*. Geliefert
-	wird die Anzahl der Laufradumdrehungen, die Größe des Leckerlivorrats
-	und der aktuelle Preis, der sich durch die Abfrage um jeweils 1€ erhöht.
+Für diese Aufgabe steht eine fertige Webanwendung auf Basis von Angular
+bereit. Sie finden in der Vorlage auch den Quellcode dieser Anwendung,
+Sie können aber auch das Kompilat der Anwendung verwenden, was im
+Webserver der Vorlage bereits als statischer Inhalt integriert ist.
 
-- `hamster bill Bigspender`
-	Gibt den vom Besitzer *Bigspender* zu zahlenden Gesamtbetrag (Summe über alle seine Hamster)
-	aus und löscht alle Datensätze von *Bigspender*.
+Sollten Sie Anpassungen an der Webanwendung vornehmen wollen, benötigen
+Sie für die Entwicklung von Angular-Anwendungen zwingend ein lokal
+installiertes Node.js. Für die Bearbeitung des Übungsblatts ist dies
+jedoch nicht notwendig.
 
-**Hinweise**
-- Falsche oder fehlende Benutzereingaben müssen abgefangen und mit einer Fehlermeldung zurückgewiesen werden. Ihr Programm sollte in solchen Fällen eine kurze Bedienungsanleitung ("RTFM-Text") ausgeben.
-- Falsche Parameter (z.B. zu lange Besitzer- oder Hamsternamen) werden von der Bibliothek zurückgewiesen. Ihr Programm sollte in solchen Fällen eine qualifizierte Fehlermeldung ausgeben.
-- Jede **Kombination** aus Hamster- und Besitzernamen darf nur ein Mal vorkommen. Versuche, dieselbe Namenskombination ein weiteres Mal einzutragen	werden von der Bibliothek erkannt und müssen mit einer qualifizierten Fehlermeldung zurückgewiesen werden.
-- Im Verzeichnis *scripts* finden Sie ein Shell-Script *testhamster.sh*, mit dem Sie Ihr Programm gründlich testen können. Es ruft Ihr Programm mit verschiedenen Optionen auf und vergleicht die erhaltene Ausgabe mit der Ausgabe der Referenz-Implementierung.
+## Authentifizierung
+
+Ihre erste Aufgabe sollte es sein, abzusichern, dass ein Client den
+Webserver nur mit passendem JWT erreichen kann. Außerdem benötigen Sie
+die Informationen über den angemeldeten User, um die für die Ausführung
+des Requests erforderlichen Informationen für die Hamsterlib zusammen zu
+bekommen. Passen Sie jedoch auf, dass der Client trotzdem auch ohne
+Authentifizierung auf statischen Content zugreifen darf, da er sonst das
+Frontend nicht laden kann.
+
+## Tests
+
+Für diese Aufgabe existiert (noch) kein Framework, was Ihre Lösung
+automatisiert testet. Daher ist auch die CI-Funktionalität begrenzt und
+prüft nur, ob Ihre Lösung kompiliert und ob die Endpunkte ohne
+entsprechenden Header eine Fehlermeldung zurückliefern.
+
+## Hinweise C
+
+Auch in diesem Übungsblatt geht es wieder um die Programmierung eines
+RESTful Webservers, weswegen kein Template in der Programmiersprache C
+zur Verfügung steht. Weichen Sie bitte auch dieses mal auf C# oder Java
+aus.
+
+## Hinweise Java
+
+Verwenden Sie für die Prüfung der Token die Bibliothek Spring Security.
+Diese ist in der Vorlage bereits eingefügt.
+
+## Hinweise C#
+
+Verwenden Sie für die Prüfung der Token das Paket
+`Microsoft.AspNetCore.JwtBearer`. Dieses ist in der Vorlage bereits
+eingefügt.

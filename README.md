@@ -267,20 +267,25 @@ sich die API-Doku für die Struktur `MQTTClient_SSLOptions` an und wie
 sie in den Testprogrammen des Paho-Projekts verwendet wird
 (<https://github.com/eclipse/paho.mqtt.c/>).
 
-## Optionale Erweiterungsideen
+## Hinweise Java
 
-Optional können Sie das ganze noch erweitern. Mögliche Ideen wären:
+Für Java existiert ebenfalls eine Version der Eclipse Paho Bibliothek. Diese steht im Maven-Repository zur Verfügung und ist in der Vorlage
+bereits integriert. Leider sind die Möglichkeiten, eigene CAs anzugeben in Paho jedoch standardmäßig sehr begrenzt, es gibt nur einen sehr allgemeinen
+Erweiterungspunkt. Um diesen zu bedienen, gibt es in der Vorlage die Klasse `TlsUtil`, die eine passende `SocketFactory` für angegebene CA- und Clientzertifikate
+bereitstellt. Auch diese Klasse verwendet für die Verschlüsselung Zertifikate und Schlüssel im PEM-Format.
 
--   Einen Hamster-Instrumentator als realen Hardware-Aufbau (bspw.
-    ESP8266-basiert)
+In der Java Vorlage gibt es auch bereits eine Klasse `SimulatedHamster`, die Methoden anbietet um Belohnungen und Bestrafungen so auf die Konsole zu schreiben, wie die Testsuite diese Ausgaben erwartet. Außerdem ist bereits ein Timer implementiert, der sobald gestartet alle 100ms einen Callback ausführen kann. Diesen Callback können Sie verwenden, um zu simulieren, dass der Hamster seine Runden dreht.
 
--   Einen richtigen Hamster-Simulator (einzelner Hamster mit
-    MQTT-Anbindung, Hamster tut Dinge, ggf. interagiert mit anderen
-    Hamstern)
+Bitte beachten Sie, sollten Sie testweise die verwendeten Server-Zertifikate durch eigene Zertifikate ersetzen wollen, Java besteht unsinnigerweise darauf, dass in den Zertifikaten ein Subject Alternative Name (SAN) gesetzt ist.
 
--   Hamster-(Pension)-Visualisierung (Daten aus dem MQTT)
+## Hinweise C#
 
--   Hamster-Kontroll-und-Motivation-Management-Software
+Für C# verwendet die Vorlage die Bibliothek MQTTnet, mit der sich neben MQTT-Clients auch Server recht einfach implementieren lassen, wie Sie in der Implementierung der Testsuite und des Testservers sehen können.
+Diese Bibliothek ist in der Vorlage bereits eingebunden.
+
+Auch in der C# Vorlage gibt es bereits eine Klasse `Hamster`, die Methoden anbietet um Belohnungen und Bestrafungen so auf die Konsole zu schreiben, wie die Testsuite diese Ausgaben erwartet. Außerdem ist bereits ein Timer implementiert, der sobald gestartet alle 100ms einen Callback ausführen kann. Diesen Callback können Sie verwenden, um zu simulieren, dass der Hamster seine Runden dreht.
+
+Beachten Sie bitte, dass .NET unter Windows nicht mit sogenannten Ephemeral Keys umgehen kann und Sie daher das PEM-Format für die Zertifikate nicht verwenden können. Stattdessen müssen Sie die Zertifikate, die Sie von Ihrem Lehrbeauftragten zurück bekommen, noch nach PKCS12 konvertieren. Auch das können Sie gut über OpenSSL bewerkstelligen.
 
 [1] Einen guten Einstieg in MQTT finden Sie neben den Vorlesungsfolien
 auch in folgendem Artikel:

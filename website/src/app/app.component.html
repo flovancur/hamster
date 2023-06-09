@@ -3,6 +3,7 @@
 
 <h1>Hello, {{ userName }}!</h1>
 
+<h3>Hamsters</h3>
 <p>Here are your hamsters:</p>
 
 <div>
@@ -27,10 +28,14 @@
   </tbody>
 </table>
 
-<input type="text" [(ngModel)]="newHamsterName" />
-<input type="text" [(ngModel)]="newHamsterTreats" />
-<button (click)="addHamster()">Add Hamster</button>
+<h3>Add new hamster</h3>
+<table>
+  <tr><td>Name:</td><td><input type="text" [(ngModel)]="newHamsterName" /></td></tr>
+  <tr><td>Treats:</td><td><input type="text" [(ngModel)]="newHamsterTreats" /></td></tr>
+  <tr><td></td><td><button (click)="addHamster()">Add Hamster</button></td></tr>
+</table>
 
-<button (click)="collect()">Collect all</button>
+<h3>Collect</h3>
+<button (click)="collect()">Collect them all</button>
   </main>
 </body>

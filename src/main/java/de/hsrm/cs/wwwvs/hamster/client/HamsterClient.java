@@ -46,10 +46,12 @@ public class HamsterClient {
     public void add(String owner, String hamster, short treats) throws Exception {
         String url = hostName.concat("/hamster");
         AddHamster newHamster = new AddHamster(owner,hamster,treats);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, newHamster, String.class);
-        System.out.println(response.getBody());
+        ResponseEntity<AddResponse> response = restTemplate.postForEntity(url, newHamster, AddResponse.class);
+        System.out.println(response.getBody().id());
     }
     public record AddHamster(String owner, String hamster,int treats){};
+    public record AddResponse(int id){};
+
 
     public void feed(String owner, String hamster, short treats) throws Exception {
         // TODO: feed hamster, print remaining treats to stdout (only the number)
@@ -58,10 +60,12 @@ public class HamsterClient {
         }
         String url = hostName.concat("/hamster/"+owner+"/"+hamster);
         FeedHamster feedHamster = new FeedHamster(treats);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, feedHamster, String.class);
-        System.out.println(response.getBody());
+        ResponseEntity<FeedResponse> response = restTemplate.postForEntity(url, feedHamster, FeedResponse.class);
+        System.out.println(response.getBody().treats());
     }
     public record FeedHamster(int treats){};
+    public record FeedResponse(int treats){};
+
 
     public void state(String owner, String hamster) throws Exception {
         String url = hostName.concat("/hamster/"+owner+"/"+hamster);
@@ -74,8 +78,10 @@ public class HamsterClient {
 
     public void bill(String owner) throws Exception {
         String url = hostName.concat("/hamster/"+owner);
-        ResponseEntity<String> response = restTemplate.exchange(url,HttpMethod.DELETE,null,String.class);
-        System.out.println(response.getBody());
+        ResponseEntity<BillResponse> response = restTemplate.exchange(url,HttpMethod.DELETE,null,BillResponse.class);
+        System.out.println(response.getBody().price());
         // TODO: collect hamsters from given owner, print amount to pay to stdout (only the number)
     }
+    public record BillResponse(int price){};
+
 }

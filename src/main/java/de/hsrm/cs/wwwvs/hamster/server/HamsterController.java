@@ -16,6 +16,7 @@ import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 @RestController
 public class HamsterController {
@@ -96,26 +98,68 @@ public class HamsterController {
             })
             .build();
 
+    RetryConfig retryConfig = RetryConfig.custom()
+            .maxAttempts(1)
+            .waitDuration(Duration.ofMillis(200))
+            .retryExceptions(HamsterException.class)
+            .build();
+
+    Retry retryWithConfig = retries.retry("FeedRetry", retryConfig);
+
+
+    CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .slowCallRateThreshold(50)
+                .waitDurationInOpenState(Duration.ofMillis(1000))
+                .slowCallDurationThreshold(Duration.ofSeconds(2))
+                .permittedNumberOfCallsInHalfOpenState(3)
+                .slidingWindow(3, 1, CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+                .automaticTransitionFromOpenToHalfOpenEnabled(true)
+                .recordException(e -> e instanceof HamsterException)
+                .build();
+
+
+
     @PostMapping("/hamster")
-    public int add(@RequestBody HamsterClient.AddHamster hamster){
+    public HamsterClient.AddResponse add(@RequestBody HamsterClient.AddHamster hamster){
         try {
-            return hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats());
+            return new HamsterClient.AddResponse(hamsterLib.new_(hamster.owner(), hamster.hamster(), (short) hamster.treats()));
         } catch (HamsterException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
+    // CircuitBreakerFactory
+
     @PostMapping("/hamster/{owner}/{hamster}")
-    public int feed(@PathVariable String owner, @PathVariable String hamster,@RequestBody HamsterClient.FeedHamster treats){
+    public HamsterClient.FeedResponse feed(@PathVariable String owner, @PathVariable String hamster,@RequestBody HamsterClient.FeedHamster treats) throws HamsterException{
+        Retry retryWithConfig = retries.retry(String.format("%s from %s", hamster, owner), retryConfig);
+        CircuitBreaker circuitBreakerWithConfig = circuitBreakers.circuitBreaker(String.format("%s from %s", hamster, owner), circuitBreakerConfig);
+
+        Callable<HamsterClient.FeedResponse> myCallable = () -> {
+            try {
+                int id = hamsterLib.lookup(owner, hamster);
+                int treatsLeft = hamsterLib.givetreats(id, (short)treats.treats());
+                return new HamsterClient.FeedResponse(treatsLeft);
+            } catch (HamsterRefusedTreatException e) {
+                throw new HamsterException() ;
+            }
+        };
+
+        Callable<HamsterClient.FeedResponse> decoratedCallable = Decorators.ofCallable(myCallable)
+                .withCircuitBreaker(circuitBreakerWithConfig)
+                .withRetry(retryWithConfig)
+                .decorate();
+
         try {
-            int id = hamsterLib.lookup(owner, hamster);
-            return hamsterLib.givetreats(id, (short)treats.treats());
-        } catch (HamsterException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, e.getMessage());
+            return decoratedCallable.call();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+
 
     @GetMapping("/hamster/{owner}/{hamster}")
     public HamsterClient.StateHamster state(@PathVariable String owner, @PathVariable String hamster){
@@ -132,9 +176,9 @@ public class HamsterController {
     }
 
     @DeleteMapping("/hamster/{owner}")
-    public String bill(@PathVariable String owner){
+    public HamsterClient.BillResponse bill(@PathVariable String owner){
         try{
-            return ""+ hamsterLib.collect(owner);
+            return new HamsterClient.BillResponse(hamsterLib.collect(owner));
         }catch (HamsterException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage());
@@ -163,7 +207,6 @@ public class HamsterController {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "No hamsters matching criteria found");
         } catch (HamsterNameTooLongException e){
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage());
         }

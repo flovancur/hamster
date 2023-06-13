@@ -26,19 +26,15 @@ public class HamsterClient {
 
     public boolean list(String ownerName, String hamsterName) throws Exception {
         String url = hostName.concat("/hamster/"+ownerName);
+        if(ownerName==null && hamsterName==null) url = hostName.concat("/hamster");
+        if(ownerName==null && hamsterName != null) url = hostName.concat("/hamster?name="+hamsterName);
         ResponseEntity<ListHamster[]> response = restTemplate.getForEntity(url, ListHamster[].class);
 
         System.out.println("Owner\tName\tPrice\ttreats left");
-        if(ownerName == null && hamsterName != null){
             //List<HamsterClient.ListHamster> tmp = new ArrayList<>();
-            for(ListHamster entry: response.getBody()){
-                if(entry.hamster.equals(hamsterName)) System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" €\t"+entry.treats);;
-            }
-        } else {
             for(ListHamster entry: response.getBody()){
                 System.out.println(entry.owner+"\t"+ entry.hamster+"\t"+entry.price+" €\t"+entry.treats);
             }
-        }
             return true;
     }
     public record ListHamster(String owner, String hamster, int treats, int price){};
@@ -49,7 +45,7 @@ public class HamsterClient {
         ResponseEntity<AddResponse> response = restTemplate.postForEntity(url, newHamster, AddResponse.class);
         System.out.println(response.getBody().id());
     }
-    public record AddHamster(String owner, String hamster,int treats){};
+    public record AddHamster(String owner, String hamster,int treats){}; // Aendern
     public record AddResponse(int id){};
 
 

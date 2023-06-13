@@ -186,16 +186,44 @@ public class HamsterController {
     }
 
     @GetMapping("/hamster/{owner}")
-    public List list(@PathVariable String owner){
+    public List list(@PathVariable String owner, @RequestParam(value = "name", required = false, defaultValue = "null") String hamster){
         List<HamsterClient.ListHamster> response = new ArrayList<>();
         owner = owner.equals("null") ? null : owner;
+        hamster = hamster.equals("null") ? null : hamster;
         try{
             var outOwner = hamsterLib.new OutString();
             var outHamster = hamsterLib.new OutString();
             var outPrice = hamsterLib.new OutShort();
             HamsterIterator iterator = hamsterLib.iterator();
             while(iterator.hasNext()){
-                int id = hamsterLib.directory(iterator,owner,null);
+                int id = hamsterLib.directory(iterator,owner,hamster);
+                int treats = hamsterLib.readentry(id, outOwner,outHamster,outPrice);
+                HamsterClient.ListHamster entry = new HamsterClient.ListHamster(outOwner.getValue(),outHamster.getValue(),treats ,outPrice.getValue());
+                response.add(entry);
+            }
+            return response;
+        }catch (HamsterEndOfDirectoryException ignored) {
+            return response;
+        } catch (HamsterNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "No hamsters matching criteria found");
+        } catch (HamsterNameTooLongException e){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/hamster")
+    public List list2(@RequestParam(value = "name", required = false, defaultValue = "null") String hamster){
+        List<HamsterClient.ListHamster> response = new ArrayList<>();
+        hamster = hamster.equals("null") ? null : hamster;
+        try{
+            var outOwner = hamsterLib.new OutString();
+            var outHamster = hamsterLib.new OutString();
+            var outPrice = hamsterLib.new OutShort();
+            HamsterIterator iterator = hamsterLib.iterator();
+            while(iterator.hasNext()){
+                int id = hamsterLib.directory(iterator,null,hamster);
                 int treats = hamsterLib.readentry(id, outOwner,outHamster,outPrice);
                 HamsterClient.ListHamster entry = new HamsterClient.ListHamster(outOwner.getValue(),outHamster.getValue(),treats ,outPrice.getValue());
                 response.add(entry);
@@ -216,7 +244,7 @@ public class HamsterController {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<String> handleException(ResponseStatusException e) {
         // Return the error message
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
 

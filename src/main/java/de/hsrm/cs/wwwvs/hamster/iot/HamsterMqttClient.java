@@ -1,6 +1,7 @@
 package de.hsrm.cs.wwwvs.hamster.iot;
 
 import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
@@ -19,6 +20,21 @@ public class HamsterMqttClient {
 
     public void connect(String host, boolean encryptedConnection, boolean authenticateClient) throws Exception {
         // TODO: connect to MQTT broker
+        String broker = (encryptedConnection ? "ssl://" : "tcp://") + host;
+        MemoryPersistence persistence = new MemoryPersistence();
+        MqttClient sampleClient = new MqttClient(broker, _hamster.getHamsterId(), persistence);
+        MqttConnectOptions connOpts = new MqttConnectOptions();
+        connOpts.setCleanSession(true);
+
+        if (authenticateClient) {
+            connOpts.setUserName("your_username");
+            connOpts.setPassword("your_password".toCharArray());
+        }
+
+        System.out.println("Connecting to broker: "+broker);
+        sampleClient.connect(connOpts);
+        System.out.println("Connected");
+
     }
 
     public void eat() {

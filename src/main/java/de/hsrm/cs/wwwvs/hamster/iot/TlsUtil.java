@@ -56,7 +56,16 @@ public class TlsUtil {
             PEMParser pemParser = new PEMParser(new FileReader(keyFile));
             Object object = pemParser.readObject();
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-            PrivateKey key = converter.getPrivateKey((PrivateKeyInfo) object);
+            PrivateKey key;
+            if (object instanceof PEMKeyPair) {
+                PEMKeyPair pemKeyPair = (PEMKeyPair) object;
+                key = converter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+            } else if (object instanceof PrivateKeyInfo) {
+                PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) object;
+                key = converter.getPrivateKey(privateKeyInfo);
+            } else {
+                throw new IllegalArgumentException("Unsupported key format");
+            }
             pemParser.close();
 
             // load client certificate

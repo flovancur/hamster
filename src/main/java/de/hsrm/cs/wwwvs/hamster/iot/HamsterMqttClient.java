@@ -140,7 +140,7 @@ public class HamsterMqttClient {
     }
 
     public void disconnect() throws MqttException {
-       // TODO: disconnect from broker
+        // TODO: disconnect from broker
 
         sampleClient.disconnect();
     }

@@ -25,7 +25,7 @@ stages:
 
 build:
   tags:
-    - docker
+    - podman
   stage: build
   script:
     - 'chmod u+x gradle-build.sh'
@@ -35,7 +35,7 @@ build:
 
 test-code-job1:
   tags:
-    - docker
+    - podman
   stage: test
   script:
     - 'chmod u+x gradle-build.sh'

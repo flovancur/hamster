@@ -3,8 +3,14 @@ package de.hsrm.cs.wwwvs.hamster.iot;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+
 
 import org.xml.sax.SAXException;
 
@@ -16,7 +22,7 @@ public class HamsterMqttClient {
         _hamster = hamster;
     }
 
-    String pension ="pension/";
+    String pension ="/pension/";
     String livestock = pension.concat("livestock");
     MqttClient sampleClient;
 
@@ -25,12 +31,7 @@ public class HamsterMqttClient {
     MqttCallback hamsterCallback = new MqttCallbackExtended(){
         @Override
         public void connectComplete(boolean reconnect, String serverURI) {
-            try {
-                sampleClient.subscribe(pension + "hamster/" + _hamster.getHamsterId() +"/fondle");
-                sampleClient.subscribe(pension + "hamster/" + _hamster.getHamsterId() +"/punish");
-            } catch (MqttException e) {
-                throw new RuntimeException(e);
-            }
+
         }
         @Override
         public void connectionLost(Throwable cause) {
@@ -38,7 +39,10 @@ public class HamsterMqttClient {
         }
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
-            int payload = Integer.parseInt(new String(message.getPayload()));
+            ByteBuffer pload = ByteBuffer.allocate(4);
+            pload.put(message.getPayload());
+            pload.rewind();
+            int payload = pload.getInt();
             if (topic.contains("fondle")){
                 _hamster.fondle(payload);
             } else{
@@ -54,26 +58,38 @@ public class HamsterMqttClient {
 
     public void connect(String host, boolean encryptedConnection, boolean authenticateClient) throws Exception {
         // TODO: connect to MQTT broker
-        String broker = encryptedConnection ? "ssl://"+host+"8883" : "tcp://"+host+"1883";
+        String broker = encryptedConnection ? "ssl://"+host+":8883" : "tcp://"+host+":1883";
         MemoryPersistence persistence = new MemoryPersistence();
         sampleClient = new MqttClient(broker, authenticateClient ? "fvanc001" : _hamster.getHamsterId(), persistence);
         MqttConnectOptions connOpts = new MqttConnectOptions();
+        connOpts.setUserName("hamster");
         connOpts.setCleanSession(true);
         connOpts.setAutomaticReconnect(true);
+        connOpts.setUserName("hamster");
 
-        if (authenticateClient) {
-            connOpts.setUserName("hamster");
-            connOpts.setPassword("hamster123".toCharArray());
+        if (encryptedConnection) {
+            SSLSocketFactory factory = TlsUtil.getSocketFactory("./certs/ca.crt",null, null, null);
+            connOpts.setSocketFactory(factory);
         }
-
+        if(authenticateClient){
+            SSLSocketFactory factory = TlsUtil.getSocketFactory("./certs/ca.crt","./certs/vancura.crt", "./certs/client.key", null);
+            connOpts.setSocketFactory(factory);
+        }
         System.out.println("Connecting to broker: "+broker);
         sampleClient.setCallback(this.hamsterCallback);
-        sampleClient.connect(connOpts);
         System.out.println("Connected");
         int qos = 2;
         MqttMessage message = new MqttMessage(_hamster.getHamsterId().getBytes());
         message.setQos(qos);
+        sampleClient.connect(connOpts);
         sampleClient.publish(livestock,message);
+        try {
+            sampleClient.subscribe(pension + "hamster/" + _hamster.getHamsterId() +"/fondle",2);
+            sampleClient.subscribe(pension + "hamster/" + _hamster.getHamsterId() +"/punish",2);
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void eat() throws MqttException {
@@ -89,7 +105,7 @@ public class HamsterMqttClient {
         // TODO: implement
         _hamster.stopRunning();
         int qos = 1;
-        MqttMessage message = new MqttMessage("MATING".getBytes());
+        MqttMessage message = new MqttMessage("MATEING".getBytes());
         message.setQos(qos);
         sampleClient.publish(pension + "hamster/" + _hamster.getHamsterId() +"/state",message);
     }
@@ -142,8 +158,6 @@ public class HamsterMqttClient {
     }
 
     public void disconnect() throws MqttException {
-        // TODO: disconnect from broker
-
         sampleClient.disconnect();
     }
 }

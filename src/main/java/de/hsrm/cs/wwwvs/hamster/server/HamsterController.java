@@ -10,6 +10,8 @@ import java.util.List;
 @RestController
 public class HamsterController {
 
+
+
     private static List<Hamster> hamsters = new ArrayList<>();
 
     @GetMapping("/hamster")

@@ -1,0 +1,38 @@
+## Token ##
+
+eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYRnA1VlF2bktWcGJuM3FXYVdzVWNwSENVUWZWYUN1blFwcEdmTWtDM3RvIn0.eyJleHAiOjE2ODc3ODQwMDAsImlhdCI6MTY4Nzc4MzcwMCwiYXV0aF90aW1lIjoxNjg3NzgzNjk5LCJqdGkiOiIwOGMwMDIxNC03M2QyLTRhN2ItODM4MS1hMWMzNjkxMTNkOTciLCJpc3MiOiJodHRwczovL2tjLnNscy5jcy5ocy1ybS5kZS9yZWFsbXMvU0xTIiwiYXVkIjoiaGFtc3RlciIsInN1YiI6IjE4MzYwNzA1LWI5YmUtNGMwMi04ZDNiLTU2NjJhNjNjZGUzNCIsInR5cCI6IklEIiwiYXpwIjoiaGFtc3RlciIsIm5vbmNlIjoiWTNaT1lVcFBTVzh5TTJKeWJWRmFUbHBQTTBKQ1VIazRlR0p2YW01dGMzSjFVelZRWldKNmR6RkZPRkJCIiwic2Vzc2lvbl9zdGF0ZSI6IjVkMjUyODA1LTdlNjUtNDFhNC1iYmVlLWVlMGM0YjQwYjkyMyIsImF0X2hhc2giOiJiN0Z0RWhvaUNVUHNDTTlqZXhfM0d3IiwiYWNyIjoiMSIsInNpZCI6IjVkMjUyODA1LTdlNjUtNDFhNC1iYmVlLWVlMGM0YjQwYjkyMyIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiRGFuaWVsIFNhbmRiw7xobGVyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGFzYW5kYnUiLCJnaXZlbl9uYW1lIjoiRGFuaWVsIiwiZmFtaWx5X25hbWUiOiJTYW5kYsO8aGxlciIsImVtYWlsIjoiZGFuaWVsLnNhbmRidWVobGVyQHN0dWRlbnQuaHMtcm0uZGUifQ.dcW6Y60bRa5-OPokggFmUS3drFq1L2Zo2_uB3pKBUA0RbWWaOKNeU83WNRWReTe4IWeSy5pK5J3pVY-u7fRN5sOjIa63RQXLTmVuCRAUaV1YFx5HS2M0O0dQ3yG7RLx3uo35smbS4JNdU2IRc3TLW1uetCTjtqLGQ4hfySPnMQNrWSQbkt30fvsiynR2VYnZ_tdV8Kc-OmejsiuQPQo5fFEGTB9n8LjxokRoIt4eojQXAYvoVyPiuskx9j726RmIMb3twdYPGY2Hgb_cAbU-VSDGPX5joqTdHGq25po3lhktJOdlg1Eu3MlDeVljOdMbzhe4WdZuKoHpptjTtWAMmA
+
+
+## Header ##
+
+{
+  "alg": "RS256",
+  "typ": "JWT",
+  "kid": "XFp5VQvnKVpbn3qWaWsUcpHCUQfVaCunQppGfMkC3to"
+}
+
+
+## Payload ##
+
+{
+  "exp": 1687784000,
+  "iat": 1687783700,
+  "auth_time": 1687783699,
+  "jti": "08c00214-73d2-4a7b-8381-a1c369113d97",
+  "iss": "https://kc.sls.cs.hs-rm.de/realms/SLS",
+  "aud": "hamster",
+  "sub": "18360705-b9be-4c02-8d3b-5662a63cde34",
+  "typ": "ID",
+  "azp": "hamster",
+  "nonce": "Y3ZOYUpPSW8yM2JybVFaTlpPM0JCUHk4eGJvam5tc3J1UzVQZWJ6dzFFOFBB",
+  "session_state": "5d252805-7e65-41a4-bbee-ee0c4b40b923",
+  "at_hash": "b7FtEhoiCUPsCM9jex_3Gw",
+  "acr": "1",
+  "sid": "5d252805-7e65-41a4-bbee-ee0c4b40b923",
+  "email_verified": true,
+  "name": "Daniel Sandbühler",
+  "preferred_username": "dasandbu",
+  "given_name": "Daniel",
+  "family_name": "Sandbühler",
+  "email": "daniel.sandbuehler@student.hs-rm.de"
+}

@@ -36,3 +36,6 @@ eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJYRnA1VlF2bktWcGJuM3FXYVdzVWNw
   "family_name": "Sandbühler",
   "email": "daniel.sandbuehler@student.hs-rm.de"
 }
+
+
+jwks_uri: https://kc.sls.cs.hs-rm.de/realms/SLS/protocol/openid-connect/certs

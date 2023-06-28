@@ -1,9 +1,12 @@
 package de.hsrm.cs.wwwvs.hamster.server;
 
+import de.hsrm.cs.wwwvs.hamster.lib.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -12,40 +15,72 @@ import java.util.List;
 @RestController
 public class HamsterController {
 
-
-
-    private static List<Hamster> hamsters = new ArrayList<>();
+    private HamsterLib hamsterLib = new HamsterLib();
+    String owner;
 
 
     @GetMapping("/hamster")
     public List<Hamster> getAllHamsters(@RequestParam(value = "name", required = false) String name) throws Exception {
-        return hamsters;
+        List<Hamster> list = new ArrayList<>();
+        name = name.equals("") ? null : name;
+        try{
+            var outOwner = hamsterLib.new OutString();
+            var outHamster = hamsterLib.new OutString();
+            var outPrice = hamsterLib.new OutShort();
+            HamsterIterator iterator = hamsterLib.iterator();
+            while(iterator.hasNext()){
+                int id = hamsterLib.directory(iterator,null,name);
+                int treats = hamsterLib.readentry(id, outOwner,outHamster,outPrice);
+                Hamster entry = new Hamster(outHamster.getValue(),outOwner.getValue(),treats ,outPrice.getValue());
+                list.add(entry);
+            }
+            return list;
+        }catch (HamsterEndOfDirectoryException | HamsterNotFoundException ignored) {
+            return list;
+        } catch (HamsterNameTooLongException e){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+
     }
 
     @PostMapping("/hamster")
     public ResponseEntity<String> addHamster(@RequestBody HamsterAddRequest request, @AuthenticationPrincipal Jwt token) throws Exception {
         if(token != null) {
             System.out.println("Claims: " + token.getClaims());
+            owner=token.getClaims().get("name").toString();
         }
-        var hamster = new Hamster(request.name(),token.getClaims().get("given_name").toString(), request.treats(), 17);
-        hamsters.add(hamster);
+        hamsterLib.new_(owner, request.name, request.treats);
         return ResponseEntity.created(new URI("http://localhost:4200/hamster")).build();
     }
 
-    @PostMapping("/hamster/{name}")
+    @PostMapping("/hamster/{name}") //auch name des Owners ermitteln
     public ResponseEntity<TreatsInfo> feed(@PathVariable String name, @RequestBody TreatsInfo treats) throws Exception {
-        System.out.println("post mapping /hamster/name triggered");
-        for(int i = 0; i < hamsters.size(); i++){
-            Hamster hamster = hamsters.get(i);
-            if (hamsters.get(i).name.equals(name)) hamsters.set(i, new Hamster(hamster.name(), hamster.owner(), hamster.treatsLeft() - treats.treats, hamster.cost()));
+        try {
+            int id = hamsterLib.lookup(owner, name);
+            int treatsLeft = hamsterLib.givetreats(id, (short)treats.treats());
+            return ResponseEntity.ok(new TreatsInfo((short)treatsLeft));
+        } catch (HamsterRefusedTreatException e) {
+            throw new HamsterException() ;
         }
-        return ResponseEntity.ok(new TreatsInfo((short)1));
     }
 
     @DeleteMapping("/hamster")
     public PriceInfo collect() throws Exception {
-        return new PriceInfo(42);
+        try{
+            return new PriceInfo(hamsterLib.collect(owner));
+        }catch (HamsterException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<String> handleException(ResponseStatusException e) {
+        // Return the error message
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
 
     public record Hamster(String name, String owner, int treatsLeft, int cost) {}
 

@@ -19,9 +19,6 @@ public class Security {
         return http.authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers("/hamster").authenticated();
                     authorize.anyRequest().permitAll();
-        })
-             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder()))
-            )
-            .build();
+        }).requiresChannel().requestMatchers("/hamster").requiresSecure().and().oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder()))).build();
     }
 }

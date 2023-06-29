@@ -51,7 +51,7 @@ public class HamsterController {
             owner=token.getClaims().get("name").toString();
         }
         hamsterLib.new_(owner, request.name, request.treats);
-        return ResponseEntity.created(new URI("http://localhost:4200/hamster")).build();
+        return ResponseEntity.created(new URI("https://localhost:8883/hamster")).build();
     }
 
     @PostMapping("/hamster/{name}") //auch name des Owners ermitteln
@@ -82,7 +82,7 @@ public class HamsterController {
     }
 
 
-    public record Hamster(String name, String owner, int treatsLeft, int cost) {}
+    public record Hamster(String name, String owner, int treats, int price) {}
 
     public record HamsterAddRequest(String name, short treats) {}
 

@@ -41,7 +41,6 @@ public class HamsterController {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage());
         }
-
     }
 
     @PostMapping("/hamster")
@@ -51,7 +50,7 @@ public class HamsterController {
             owner=token.getClaims().get("name").toString();
         }
         hamsterLib.new_(owner, request.name, request.treats);
-        return ResponseEntity.created(new URI("https://localhost:8883/hamster")).build();
+        return ResponseEntity.created(new URI("https://localhost:4200/hamster")).build();
     }
 
     @PostMapping("/hamster/{name}") //auch name des Owners ermitteln

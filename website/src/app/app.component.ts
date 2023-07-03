@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
       this.oauth.setupAutomaticSilentRefresh();
     })
   }
-  
+
   get userName(): string {
     return this.oauth.getIdentityClaims().given_name;
   }
@@ -76,7 +76,7 @@ export class AppComponent implements OnInit {
     });
   }
 }
-  
+
 interface Hamster {
   owner: string;
   name: string;

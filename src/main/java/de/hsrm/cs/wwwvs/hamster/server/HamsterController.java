@@ -47,7 +47,7 @@ public class HamsterController {
     public ResponseEntity<String> addHamster(@RequestBody HamsterAddRequest request, @AuthenticationPrincipal Jwt token) throws Exception {
         if(token != null) {
             System.out.println("Claims: " + token.getClaims());
-            owner=token.getClaims().get("name").toString();
+            owner=token.getClaims().get("preferred_username").toString();
         }
         hamsterLib.new_(owner, request.name, request.treats);
         return ResponseEntity.created(new URI("https://localhost:4200/hamster")).build();
